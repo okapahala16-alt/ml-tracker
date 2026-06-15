@@ -67,7 +67,7 @@ Return ONLY a valid JSON object (no markdown, no explanation):
 
 Rules:
 - "result": "win" if VICTORY shown, "loss" if DEFEAT
-- Include ALL players visible, winning team first then losing team
+- IMPORTANT: Return LEFT column players FIRST (positions 1-5 on left side), then RIGHT column players (positions 1-5 on right side). The left column is always the first team listed regardless of win/loss.
 - K/D/A: three numbers per row (e.g. "6 0 8" = 6 kills, 0 deaths, 8 assists)
 - "rating": decimal number near the rank badge (e.g. 10.4)
 - "emblem": "mvp", "gold", "silver", or "bronze" — default "silver" if unclear
