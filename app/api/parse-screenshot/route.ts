@@ -96,7 +96,7 @@ Rules:
     if (jsonMatch) cleaned = jsonMatch[0]
 
     // Remove control characters that break JSON parsing
-    cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, (ch) =>
+    cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, (ch: string) =>
       ch === '\n' || ch === '\r' || ch === '\t' ? ch : ''
     )
 
