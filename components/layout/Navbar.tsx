@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: '/match/new',   label: 'Input Match',  icon: PlusCircle      },
   { href: '/matches',     label: 'Riwayat',      icon: History         },
   { href: '/leaderboard', label: 'Leaderboard',  icon: Trophy          },
+  { href: '/squad',       label: 'Squad',        icon: Trophy          },
   { href: '/seasons',     label: 'Seasons',      icon: CalendarDays    },
 ]
 

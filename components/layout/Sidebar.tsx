@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, PlusCircle, Trophy,
   CalendarDays, Swords, History,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Users,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/match/new',   label: 'Input Match',   icon: PlusCircle      },
   { href: '/matches',     label: 'Riwayat Match', icon: History         },
   { href: '/leaderboard', label: 'Leaderboard',   icon: Trophy          },
+  { href: '/squad',       label: 'Squad',         icon: Users           },
   { href: '/seasons',     label: 'Seasons',       icon: CalendarDays    },
 ]
 
