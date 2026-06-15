@@ -82,7 +82,7 @@ export default function SquadAnalytics({ matches, members }: Props) {
     const pairStats: Record<string, Record<string, { wins: number; total: number }>> = {}
 
     matches.forEach((match) => {
-      const keys = [...new Set(match.squad_match_players.map((p) => norm(p.in_game_name)))]
+      const keys = Array.from(new Set(match.squad_match_players.map((p) => norm(p.in_game_name))))
       keys.forEach((a) => {
         keys.forEach((b) => {
           if (a === b) return
