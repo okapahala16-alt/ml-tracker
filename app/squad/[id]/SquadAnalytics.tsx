@@ -17,20 +17,34 @@ function kda(kills: number, deaths: number, assists: number) {
 }
 
 export default function SquadAnalytics({ matches, members }: Props) {
-  const stats = useMemo(() => {
-    // Per-member stats
-    const memberStats: Record<string, {
-      wins: number; losses: number; kills: number; deaths: number; assists: number; ratingSum: number; ratingCount: number
-    }> = {}
-
-    members.forEach((m) => {
-      memberStats[m.user_id] = { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, ratingSum: 0, ratingCount: 0 }
+  const { nameStats, pairStats, nameToMember, allNames } = useMemo(() => {
+    // Map in_game_name → member (if claimed)
+    const nameToMember: Record<string, Member | null> = {}
+    matches.forEach((match) => {
+      match.squad_match_players.forEach((p) => {
+        if (!(p.in_game_name in nameToMember)) {
+          nameToMember[p.in_game_name] = p.user_id
+            ? (members.find((m) => m.user_id === p.user_id) ?? null)
+            : null
+        } else if (!nameToMember[p.in_game_name] && p.user_id) {
+          nameToMember[p.in_game_name] = members.find((m) => m.user_id === p.user_id) ?? null
+        }
+      })
     })
+
+    // Per-name stats (works regardless of claim status)
+    const nameStats: Record<string, {
+      wins: number; losses: number
+      kills: number; deaths: number; assists: number
+      ratingSum: number; ratingCount: number
+    }> = {}
 
     matches.forEach((match) => {
       match.squad_match_players.forEach((p) => {
-        if (!p.user_id || !memberStats[p.user_id]) return
-        const s = memberStats[p.user_id]
+        if (!nameStats[p.in_game_name]) {
+          nameStats[p.in_game_name] = { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, ratingSum: 0, ratingCount: 0 }
+        }
+        const s = nameStats[p.in_game_name]
         if (match.result === 'win') s.wins++; else s.losses++
         s.kills   += p.kills
         s.deaths  += p.deaths
@@ -39,16 +53,13 @@ export default function SquadAnalytics({ matches, members }: Props) {
       })
     })
 
-    // Winrate when playing with each specific other member (pairwise)
+    // Pairwise winrate by in_game_name
     const pairStats: Record<string, Record<string, { wins: number; total: number }>> = {}
 
     matches.forEach((match) => {
-      const presentMembers = match.squad_match_players
-        .filter((p) => p.user_id && memberStats[p.user_id])
-        .map((p) => p.user_id as string)
-
-      presentMembers.forEach((a) => {
-        presentMembers.forEach((b) => {
+      const names = match.squad_match_players.map((p) => p.in_game_name)
+      names.forEach((a) => {
+        names.forEach((b) => {
           if (a === b) return
           if (!pairStats[a]) pairStats[a] = {}
           if (!pairStats[a][b]) pairStats[a][b] = { wins: 0, total: 0 }
@@ -58,12 +69,29 @@ export default function SquadAnalytics({ matches, members }: Props) {
       })
     })
 
-    return { memberStats, pairStats }
+    const allNames = Object.keys(nameStats).sort()
+    return { nameStats, pairStats, nameToMember, allNames }
   }, [matches, members])
 
   const totalMatches = matches.length
   const totalWins    = matches.filter((m) => m.result === 'win').length
   const overallWR    = totalMatches > 0 ? Math.round((totalWins / totalMatches) * 100) : 0
+
+  function getDisplayName(name: string) {
+    const member = nameToMember[name]
+    return member ? (member.display_name || member.username) : name
+  }
+
+  function getColor(name: string) {
+    return nameToMember[name]?.color ?? '#475569'
+  }
+
+  function getInitial(name: string) {
+    return (nameToMember[name]
+      ? (nameToMember[name]!.display_name || nameToMember[name]!.username)
+      : name
+    )[0]?.toUpperCase()
+  }
 
   return (
     <div className="space-y-4">
@@ -86,31 +114,30 @@ export default function SquadAnalytics({ matches, members }: Props) {
         </div>
       </div>
 
-      {/* Per member */}
+      {/* Per player */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800">
           <h2 className="font-semibold text-white">Performa per Anggota</h2>
         </div>
         <div className="divide-y divide-slate-800/50">
-          {members.map((m) => {
-            const s = stats.memberStats[m.user_id]
-            if (!s) return null
+          {allNames.map((name) => {
+            const s = nameStats[name]
             const total = s.wins + s.losses
             if (total === 0) return null
             const wr = Math.round((s.wins / total) * 100)
-            const avgKDA = total > 0 ? kda(s.kills / total, s.deaths / total, s.assists / total) : 0
+            const avgKDA = kda(s.kills / total, s.deaths / total, s.assists / total)
             const avgRating = s.ratingCount > 0 ? (s.ratingSum / s.ratingCount).toFixed(1) : '—'
 
             return (
-              <div key={m.user_id} className="px-5 py-4 flex items-center gap-3">
+              <div key={name} className="px-5 py-4 flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                  style={{ backgroundColor: m.color ?? '#6366f1' }}
+                  style={{ backgroundColor: getColor(name) }}
                 >
-                  {(m.display_name || m.username)[0]?.toUpperCase()}
+                  {getInitial(name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{m.display_name || m.username}</p>
+                  <p className="text-sm font-semibold text-white truncate">{getDisplayName(name)}</p>
                   <p className="text-xs text-slate-500">{total} match · KDA {avgKDA.toFixed(2)} · Rating {avgRating}</p>
                 </div>
                 <div className="text-right shrink-0">
@@ -130,58 +157,49 @@ export default function SquadAnalytics({ matches, members }: Props) {
           <p className="text-xs text-slate-500 mt-0.5">Seberapa sering menang saat bermain bersama anggota tertentu</p>
         </div>
         <div className="divide-y divide-slate-800/50">
-          {members.map((a) => {
-            const pairs = stats.pairStats[a.user_id]
+          {allNames.map((nameA) => {
+            const pairs = pairStats[nameA]
             if (!pairs) return null
             const entries = Object.entries(pairs)
-              .map(([bId, data]) => {
-                const b = members.find((m) => m.user_id === bId)
-                if (!b || data.total < 1) return null
-                const wr = Math.round((data.wins / data.total) * 100)
-                return { b, wr, ...data }
-              })
-              .filter(Boolean)
-              .sort((x, y) => (y!.wr - x!.wr))
+              .filter(([, d]) => d.total >= 1)
+              .map(([nameB, d]) => ({ nameB, wr: Math.round((d.wins / d.total) * 100), ...d }))
+              .sort((x, y) => y.wr - x.wr)
 
             if (entries.length === 0) return null
 
             return (
-              <div key={a.user_id} className="px-5 py-4">
+              <div key={nameA} className="px-5 py-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div
                     className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                    style={{ backgroundColor: a.color ?? '#6366f1' }}
+                    style={{ backgroundColor: getColor(nameA) }}
                   >
-                    {(a.display_name || a.username)[0]?.toUpperCase()}
+                    {getInitial(nameA)}
                   </div>
-                  <span className="text-sm font-semibold text-white">{a.display_name || a.username}</span>
+                  <span className="text-sm font-semibold text-white">{getDisplayName(nameA)}</span>
                   <span className="text-xs text-slate-500">bermain dengan:</span>
                 </div>
                 <div className="space-y-2 pl-8">
-                  {entries.map((entry) => {
-                    if (!entry) return null
-                    const { b, wr, wins, total } = entry
-                    return (
-                      <div key={b.user_id} className="flex items-center gap-3">
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-                          style={{ backgroundColor: b.color ?? '#6366f1' }}
-                        >
-                          {(b.display_name || b.username)[0]?.toUpperCase()}
-                        </div>
-                        <span className="text-sm text-slate-300 flex-1">{b.display_name || b.username}</span>
-                        <div className="flex items-center gap-2">
-                          {wr >= 55 ? <TrendingUp className="w-3.5 h-3.5 text-green-400" />
-                            : wr <= 45 ? <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-                            : <Minus className="w-3.5 h-3.5 text-slate-500" />}
-                          <span className={`text-sm font-bold ${wr >= 55 ? 'text-green-400' : wr <= 45 ? 'text-red-400' : 'text-slate-400'}`}>
-                            {wr}%
-                          </span>
-                          <span className="text-xs text-slate-600">({wins}W/{total - wins}L)</span>
-                        </div>
+                  {entries.map(({ nameB, wr, wins, total }) => (
+                    <div key={nameB} className="flex items-center gap-3">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                        style={{ backgroundColor: getColor(nameB) }}
+                      >
+                        {getInitial(nameB)}
                       </div>
-                    )
-                  })}
+                      <span className="text-sm text-slate-300 flex-1 truncate">{getDisplayName(nameB)}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {wr >= 55 ? <TrendingUp className="w-3.5 h-3.5 text-green-400" />
+                          : wr <= 45 ? <TrendingDown className="w-3.5 h-3.5 text-red-400" />
+                          : <Minus className="w-3.5 h-3.5 text-slate-500" />}
+                        <span className={`text-sm font-bold ${wr >= 55 ? 'text-green-400' : wr <= 45 ? 'text-red-400' : 'text-slate-400'}`}>
+                          {wr}%
+                        </span>
+                        <span className="text-xs text-slate-600">({wins}W/{total - wins}L)</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )
