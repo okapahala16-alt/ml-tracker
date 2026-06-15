@@ -1,0 +1,47 @@
+'use client'
+
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { ChevronDown, Filter } from 'lucide-react'
+
+type Season = { id: string; name: string; is_active: boolean }
+
+interface Props {
+  seasons:  Season[]
+  selected: string
+}
+
+export default function LeaderboardSeasonFilter({ seasons, selected }: Props) {
+  const router       = useRouter()
+  const pathname     = usePathname()
+  const searchParams = useSearchParams()
+
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (e.target.value === 'all') {
+      params.delete('season')
+    } else {
+      params.set('season', e.target.value)
+    }
+    const qs = params.toString()
+    router.push(qs ? `${pathname}?${qs}` : pathname)
+  }
+
+  return (
+    <div className="relative inline-flex items-center">
+      <Filter className="absolute left-3 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+      <select
+        value={selected}
+        onChange={handleChange}
+        className="appearance-none pl-8 pr-8 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+      >
+        <option value="all">Semua Season</option>
+        {seasons.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name}{s.is_active ? ' ✦' : ''}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+    </div>
+  )
+}
