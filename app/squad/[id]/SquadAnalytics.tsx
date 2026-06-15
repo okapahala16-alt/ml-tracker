@@ -16,23 +16,47 @@ function kda(kills: number, deaths: number, assists: number) {
   return deaths > 0 ? (kills + assists) / deaths : kills + assists
 }
 
+// Normalize: lowercase + trim + strip trailing dots → groups "Fyruss" / "Fyruss." / "FYRUSS" together
+function norm(name: string): string {
+  return name.trim().toLowerCase().replace(/\.+$/, '').trim()
+}
+
+// Pick best display version: prefer no trailing dot, prefer Title Case over ALL CAPS
+function bestName(rawNames: string[]): string {
+  const noDot = rawNames.filter((n) => !n.trimEnd().endsWith('.'))
+  const pool  = noDot.length > 0 ? noDot : rawNames
+  const notAllCaps = pool.filter((n) => n !== n.toUpperCase())
+  return notAllCaps.length > 0 ? notAllCaps[0] : pool[0]
+}
+
 export default function SquadAnalytics({ matches, members }: Props) {
-  const { nameStats, pairStats, nameToMember, allNames } = useMemo(() => {
-    // Map in_game_name → member (if claimed)
+  const { nameStats, pairStats, nameToMember, displayName, allNames } = useMemo(() => {
+    // Collect raw names per normalized key
+    const rawNamesMap: Record<string, string[]> = {}
+    matches.forEach((match) => {
+      match.squad_match_players.forEach((p) => {
+        const key = norm(p.in_game_name)
+        if (!rawNamesMap[key]) rawNamesMap[key] = []
+        if (!rawNamesMap[key].includes(p.in_game_name)) rawNamesMap[key].push(p.in_game_name)
+      })
+    })
+
+    // Best display name per normalized key
+    const displayName: Record<string, string> = {}
+    Object.entries(rawNamesMap).forEach(([key, raws]) => { displayName[key] = bestName(raws) })
+
+    // Map normalized key → member (if claimed)
     const nameToMember: Record<string, Member | null> = {}
     matches.forEach((match) => {
       match.squad_match_players.forEach((p) => {
-        if (!(p.in_game_name in nameToMember)) {
-          nameToMember[p.in_game_name] = p.user_id
-            ? (members.find((m) => m.user_id === p.user_id) ?? null)
-            : null
-        } else if (!nameToMember[p.in_game_name] && p.user_id) {
-          nameToMember[p.in_game_name] = members.find((m) => m.user_id === p.user_id) ?? null
+        const key = norm(p.in_game_name)
+        if (!nameToMember[key] && p.user_id) {
+          nameToMember[key] = members.find((m) => m.user_id === p.user_id) ?? null
         }
       })
     })
 
-    // Per-name stats (works regardless of claim status)
+    // Per-name stats grouped by normalized key
     const nameStats: Record<string, {
       wins: number; losses: number
       kills: number; deaths: number; assists: number
@@ -41,10 +65,11 @@ export default function SquadAnalytics({ matches, members }: Props) {
 
     matches.forEach((match) => {
       match.squad_match_players.forEach((p) => {
-        if (!nameStats[p.in_game_name]) {
-          nameStats[p.in_game_name] = { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, ratingSum: 0, ratingCount: 0 }
+        const key = norm(p.in_game_name)
+        if (!nameStats[key]) {
+          nameStats[key] = { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, ratingSum: 0, ratingCount: 0 }
         }
-        const s = nameStats[p.in_game_name]
+        const s = nameStats[key]
         if (match.result === 'win') s.wins++; else s.losses++
         s.kills   += p.kills
         s.deaths  += p.deaths
@@ -53,13 +78,13 @@ export default function SquadAnalytics({ matches, members }: Props) {
       })
     })
 
-    // Pairwise winrate by in_game_name
+    // Pairwise winrate by normalized key
     const pairStats: Record<string, Record<string, { wins: number; total: number }>> = {}
 
     matches.forEach((match) => {
-      const names = match.squad_match_players.map((p) => p.in_game_name)
-      names.forEach((a) => {
-        names.forEach((b) => {
+      const keys = [...new Set(match.squad_match_players.map((p) => norm(p.in_game_name)))]
+      keys.forEach((a) => {
+        keys.forEach((b) => {
           if (a === b) return
           if (!pairStats[a]) pairStats[a] = {}
           if (!pairStats[a][b]) pairStats[a][b] = { wins: 0, total: 0 }
@@ -69,28 +94,25 @@ export default function SquadAnalytics({ matches, members }: Props) {
       })
     })
 
-    const allNames = Object.keys(nameStats).sort()
-    return { nameStats, pairStats, nameToMember, allNames }
+    const allNames = Object.keys(nameStats).sort((a, b) => displayName[a].localeCompare(displayName[b]))
+    return { nameStats, pairStats, nameToMember, displayName, allNames }
   }, [matches, members])
 
   const totalMatches = matches.length
   const totalWins    = matches.filter((m) => m.result === 'win').length
   const overallWR    = totalMatches > 0 ? Math.round((totalWins / totalMatches) * 100) : 0
 
-  function getDisplayName(name: string) {
-    const member = nameToMember[name]
-    return member ? (member.display_name || member.username) : name
+  function getDisplayName(key: string) {
+    const member = nameToMember[key]
+    return member ? (member.display_name || member.username) : displayName[key]
   }
 
-  function getColor(name: string) {
-    return nameToMember[name]?.color ?? '#475569'
+  function getColor(key: string) {
+    return nameToMember[key]?.color ?? '#475569'
   }
 
-  function getInitial(name: string) {
-    return (nameToMember[name]
-      ? (nameToMember[name]!.display_name || nameToMember[name]!.username)
-      : name
-    )[0]?.toUpperCase()
+  function getInitial(key: string) {
+    return getDisplayName(key)[0]?.toUpperCase()
   }
 
   return (
