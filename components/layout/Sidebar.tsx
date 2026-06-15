@@ -43,21 +43,26 @@ export default function Sidebar() {
   }
 
   // Prevent layout shift on SSR
+  const sidebarStyle = {
+    background: 'var(--bg-card)',
+    borderRight: '1px solid var(--border)',
+  }
+
   if (!mounted) return (
-    <aside className="hidden lg:flex w-56 shrink-0 min-h-[calc(100vh-4rem)] bg-slate-900 border-r border-slate-800" />
+    <aside className="hidden lg:flex w-56 shrink-0 min-h-[calc(100vh-4rem)]" style={sidebarStyle} />
   )
 
   return (
     <aside
-      className={`hidden lg:flex flex-col shrink-0 min-h-[calc(100vh-4rem)] bg-slate-900 border-r border-slate-800 transition-all duration-300 ${
-        collapsed ? 'w-16' : 'w-56'
-      }`}
+      className={`hidden lg:flex flex-col shrink-0 min-h-[calc(100vh-4rem)] transition-all duration-300 ${collapsed ? 'w-16' : 'w-56'}`}
+      style={sidebarStyle}
     >
       {/* Toggle button */}
       <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'} px-3 pt-4 pb-2`}>
         <button
           onClick={toggle}
-          className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors"
+          className="p-1.5 rounded-lg transition-colors"
+          style={{ color: 'var(--text-muted)' }}
           title={collapsed ? 'Buka sidebar' : 'Tutup sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -67,9 +72,7 @@ export default function Sidebar() {
       {/* Section label */}
       {!collapsed && (
         <div className="px-4 pb-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-            Navigation
-          </p>
+          <p className="section-label">Navigation</p>
         </div>
       )}
 
@@ -82,24 +85,33 @@ export default function Sidebar() {
               key={href}
               href={href}
               title={collapsed ? label : undefined}
-              className={`group flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-150 border ${
+              className={`group flex items-center gap-3 rounded-xl text-sm font-semibold transition-all duration-150 ${
                 collapsed ? 'px-0 py-2.5 justify-center' : 'px-3 py-2.5'
-              } ${
-                active
-                  ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/10 text-blue-400 border-blue-500/25 shadow-sm shadow-blue-900/20'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800 border-transparent'
               }`}
+              style={{
+                fontFamily: 'var(--font-rajdhani)',
+                letterSpacing: '0.04em',
+                background: active
+                  ? 'linear-gradient(135deg, rgba(79,142,247,0.12), rgba(124,58,237,0.08))'
+                  : 'transparent',
+                border: active
+                  ? '1px solid rgba(79,142,247,0.18)'
+                  : '1px solid transparent',
+                color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+              }}
             >
               <Icon
-                className={`shrink-0 transition-colors ${collapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]'} ${
-                  active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
-                }`}
+                className={`shrink-0 transition-colors ${collapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]'}`}
+                style={{ color: active ? 'var(--accent-blue)' : 'var(--text-muted)' }}
               />
               {!collapsed && (
                 <>
                   <span className="flex-1">{label}</span>
                   {active && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-sm shadow-blue-400/50" />
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)' }}
+                    />
                   )}
                 </>
               )}
@@ -109,10 +121,13 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className={`py-5 border-t border-slate-800/60 ${collapsed ? 'flex justify-center' : 'px-4'}`}>
-        <div className="flex items-center gap-2 text-slate-600">
+      <div
+        className={`py-5 ${collapsed ? 'flex justify-center' : 'px-4'}`}
+        style={{ borderTop: '1px solid var(--border)' }}
+      >
+        <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
           <Swords className="w-4 h-4 shrink-0" />
-          {!collapsed && <span className="text-xs">ML Tracker v1.0</span>}
+          {!collapsed && <span className="text-xs" style={{ fontFamily: 'var(--font-rajdhani)' }}>ML Tracker v1.0</span>}
         </div>
       </div>
     </aside>

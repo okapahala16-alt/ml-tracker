@@ -20,16 +20,24 @@ export default function SortToggle({ current }: { current: string }) {
   }
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-slate-800/80 border border-slate-700/50 rounded-xl">
+    <div
+      className="flex items-center gap-1 p-1 rounded-xl"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+    >
       {OPTIONS.map((opt) => (
         <button
           key={opt.value}
           onClick={() => handleSort(opt.value)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-            current === opt.value
-              ? 'bg-slate-700 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-          }`}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+          style={{
+            fontFamily: 'var(--font-rajdhani)',
+            letterSpacing: '0.04em',
+            background: current === opt.value
+              ? 'linear-gradient(135deg, rgba(79,142,247,0.15), rgba(124,58,237,0.1))'
+              : 'transparent',
+            border: current === opt.value ? '1px solid rgba(79,142,247,0.2)' : '1px solid transparent',
+            color: current === opt.value ? 'var(--accent-blue)' : 'var(--text-secondary)',
+          }}
         >
           {opt.label}
         </button>
