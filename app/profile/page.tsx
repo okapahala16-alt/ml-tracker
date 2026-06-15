@@ -12,7 +12,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, display_name')
+    .select('username, display_name, color')
     .eq('id', user.id)
     .single()
 
@@ -23,6 +23,7 @@ export default async function ProfilePage() {
       userId={user.id}
       initialUsername={profile.username}
       initialDisplayName={profile.display_name ?? ''}
+      color={profile.color ?? '#6366f1'}
     />
   )
 }

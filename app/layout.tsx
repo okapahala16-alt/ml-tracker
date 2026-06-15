@@ -33,12 +33,12 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  let profile: { username: string; display_name: string | null } | null = null
+  let profile: { username: string; display_name: string | null; color: string } | null = null
 
   if (user) {
     const { data } = await supabase
       .from('profiles')
-      .select('username, display_name')
+      .select('username, display_name, color')
       .eq('id', user.id)
       .single()
     profile = data
@@ -55,6 +55,7 @@ export default async function RootLayout({
           <Navbar
             username={profile!.username}
             displayName={profile!.display_name || profile!.username}
+            color={profile!.color ?? '#6366f1'}
           />
         )}
 

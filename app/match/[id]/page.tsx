@@ -62,7 +62,7 @@ export default async function MatchDetailPage({
   const { data: rawProfiles } = userIds.length
     ? await supabase
         .from('profiles')
-        .select('id, username, display_name')
+        .select('id, username, display_name, color')
         .in('id', userIds)
     : { data: [] }
 
@@ -176,13 +176,14 @@ export default async function MatchDetailPage({
             const matchKDA = kdaStr(mp.kills ?? 0, mp.deaths ?? 0, mp.assists ?? 0)
             const initial  = (profile?.display_name || profile?.username || '?')[0]?.toUpperCase()
             const ratingNum = mp.rating ?? 0
+            const avatarColor = (profile as unknown as { color?: string })?.color ?? '#6366f1'
 
             return (
               <div key={mp.id} className={`px-5 sm:px-6 py-4 hover:bg-slate-800/20 transition-colors ${idx === 0 ? 'bg-yellow-500/3' : ''}`}>
 
                 {/* Mobile */}
                 <div className="flex items-center gap-3 sm:hidden">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ backgroundColor: avatarColor }}>
                     {initial}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -209,7 +210,7 @@ export default async function MatchDetailPage({
                   style={{ gridTemplateColumns: '1.8fr 1.4fr 56px 56px 56px 80px 72px' }}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: avatarColor }}>
                       {initial}
                     </div>
                     <div className="min-w-0">

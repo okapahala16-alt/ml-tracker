@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 interface NavbarProps {
   username: string
   displayName: string
+  color: string
 }
 
 const NAV_LINKS = [
@@ -24,7 +25,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + '/')
 }
 
-export default function Navbar({ username, displayName }: NavbarProps) {
+export default function Navbar({ username, displayName, color }: NavbarProps) {
   const pathname = usePathname()
   const router   = useRouter()
   const [open, setOpen] = useState(false)
@@ -79,7 +80,7 @@ export default function Navbar({ username, displayName }: NavbarProps) {
               href="/profile"
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-slate-600 transition-colors group"
             >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: color }}>
                 {initial}
               </div>
               <div className="leading-none">
@@ -136,7 +137,7 @@ export default function Navbar({ username, displayName }: NavbarProps) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 group"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ backgroundColor: color }}>
                 {initial}
               </div>
               <div>

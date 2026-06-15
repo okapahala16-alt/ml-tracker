@@ -9,9 +9,10 @@ interface Props {
   userId:             string
   initialUsername:    string
   initialDisplayName: string
+  color:              string
 }
 
-export default function ProfileForm({ userId, initialUsername, initialDisplayName }: Props) {
+export default function ProfileForm({ userId, initialUsername, initialDisplayName, color }: Props) {
   const router = useRouter()
 
   const [username,    setUsername]    = useState(initialUsername)
@@ -89,7 +90,7 @@ export default function ProfileForm({ userId, initialUsername, initialDisplayNam
 
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-7">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shrink-0">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shrink-0" style={{ backgroundColor: color }}>
           {(displayName || username)[0]?.toUpperCase() ?? '?'}
         </div>
         <div>
