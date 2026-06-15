@@ -32,6 +32,14 @@ export default async function SquadDetailPage({ params }: { params: { id: string
 
   if (!isOwner && !membership) redirect('/squad')
 
+  // Auto-add current user as member if missing
+  if (!membership) {
+    await supabase.from('squad_members').upsert(
+      { squad_session_id: params.id, user_id: user.id },
+      { onConflict: 'squad_session_id,user_id' }
+    )
+  }
+
   // Fetch members with profiles
   const { data: members } = await supabase
     .from('squad_members')
