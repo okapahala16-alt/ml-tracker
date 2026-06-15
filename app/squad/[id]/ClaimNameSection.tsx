@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 interface Props {
   squadId:    string
   userId:     string
-  myMapping:  string | null // in-game name already claimed by this user
+  myMapping:  string | null
 }
 
 export default function ClaimNameSection({ squadId, userId, myMapping }: Props) {
@@ -18,8 +18,23 @@ export default function ClaimNameSection({ squadId, userId, myMapping }: Props) 
   const [error,      setError]      = useState<string | null>(null)
 
   useEffect(() => {
-    async function fetchUnassigned() {
+    async function fetchData() {
       const supabase = createClient()
+
+      // Always re-check from DB — server prop may be stale
+      const { data: existingMapping } = await supabase
+        .from('squad_name_mappings')
+        .select('in_game_name')
+        .eq('squad_session_id', squadId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (existingMapping) {
+        setClaimed(existingMapping.in_game_name)
+        setLoading(false)
+        return
+      }
+
       const { data: matches } = await supabase
         .from('squad_matches')
         .select('id')
@@ -33,14 +48,6 @@ export default function ClaimNameSection({ squadId, userId, myMapping }: Props) 
         .select('in_game_name, user_id')
         .in('squad_match_id', matchIds)
 
-      // Unique names with no user_id assigned across all appearances
-      const nameMap: Record<string, boolean> = {}
-      ;(players ?? []).forEach((p) => {
-        if (!nameMap[p.in_game_name]) nameMap[p.in_game_name] = true
-        if (p.user_id) nameMap[p.in_game_name] = false // has at least one assigned → not fully unassigned
-      })
-
-      // Show names that appear unassigned at least once and aren't fully claimed
       const allNames = Array.from(new Set((players ?? []).map((p) => p.in_game_name)))
       const unassignedNames = allNames.filter((name) => {
         const rows = (players ?? []).filter((p) => p.in_game_name === name)
@@ -50,13 +57,27 @@ export default function ClaimNameSection({ squadId, userId, myMapping }: Props) 
       setUnassigned(unassignedNames.sort())
       setLoading(false)
     }
-    fetchUnassigned()
-  }, [squadId])
+    fetchData()
+  }, [squadId, userId])
 
   async function handleClaim(inGameName: string) {
     setClaiming(inGameName)
     setError(null)
     const supabase = createClient()
+
+    // Guard: abort if user already has any mapping in this squad
+    const { data: existingMapping } = await supabase
+      .from('squad_name_mappings')
+      .select('in_game_name')
+      .eq('squad_session_id', squadId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (existingMapping) {
+      setClaimed(existingMapping.in_game_name)
+      setClaiming(null)
+      return
+    }
 
     // 1. Upsert name mapping
     const { error: mappingErr } = await supabase
@@ -72,66 +93,67 @@ export default function ClaimNameSection({ squadId, userId, myMapping }: Props) 
       return
     }
 
-    // 2. Update squad_match_players: assign user_id where name matches and unassigned
-    await supabase
-      .from('squad_match_players')
-      .update({ user_id: userId })
-      .eq('in_game_name', inGameName)
-      .is('user_id', null)
-      .in(
-        'squad_match_id',
-        (await supabase
-          .from('squad_matches')
-          .select('id')
-          .eq('squad_session_id', squadId)
-        ).data?.map((m) => m.id) ?? []
-      )
+    // 2. Get only the unassigned rows (user_id IS NULL) for this name — these are the ones not yet synced
+    const { data: squadMatchesData } = await supabase
+      .from('squad_matches')
+      .select('id')
+      .eq('squad_session_id', squadId)
 
-    // 3. Sync historical matches to personal
-    const { data: myPlayers } = await supabase
+    const allMatchIds = (squadMatchesData ?? []).map((m) => m.id)
+
+    const { data: unassignedRows } = await supabase
       .from('squad_match_players')
       .select('squad_match_id, hero_id, kills, deaths, assists, rating, squad_matches(result, match_date)')
       .eq('in_game_name', inGameName)
-      .in(
-        'squad_match_id',
-        (await supabase
-          .from('squad_matches')
-          .select('id')
-          .eq('squad_session_id', squadId)
-        ).data?.map((m) => m.id) ?? []
-      )
+      .is('user_id', null)
+      .in('squad_match_id', allMatchIds)
 
-    const { data: activeSeason } = await supabase
-      .from('seasons')
-      .select('id')
-      .eq('is_active', true)
-      .maybeSingle()
+    const newMatchIds = (unassignedRows ?? []).map((r) => r.squad_match_id)
 
-    for (const mp of myPlayers ?? []) {
-      const matchData = mp.squad_matches as unknown as { result: string; match_date: string } | null
-      if (!matchData) continue
+    // 3. Update only the unassigned rows
+    if (newMatchIds.length > 0) {
+      await supabase
+        .from('squad_match_players')
+        .update({ user_id: userId })
+        .eq('in_game_name', inGameName)
+        .is('user_id', null)
+        .in('squad_match_id', newMatchIds)
+    }
 
-      const { data: personalMatch } = await supabase
-        .from('matches')
-        .insert({
-          season_id:  activeSeason?.id ?? null,
-          match_date: matchData.match_date,
-          result:     matchData.result,
-          created_by: userId,
-        })
+    // 4. Sync personal records ONLY for newly assigned matches (prevents duplicates)
+    if ((unassignedRows ?? []).length > 0) {
+      const { data: activeSeason } = await supabase
+        .from('seasons')
         .select('id')
-        .single()
+        .eq('is_active', true)
+        .maybeSingle()
 
-      if (personalMatch) {
-        await supabase.from('match_players').insert({
-          match_id: personalMatch.id,
-          user_id:  userId,
-          hero_id:  mp.hero_id,
-          kills:    mp.kills,
-          deaths:   mp.deaths,
-          assists:  mp.assists,
-          rating:   mp.rating,
-        })
+      for (const mp of unassignedRows ?? []) {
+        const matchData = mp.squad_matches as unknown as { result: string; match_date: string } | null
+        if (!matchData) continue
+
+        const { data: personalMatch } = await supabase
+          .from('matches')
+          .insert({
+            season_id:  activeSeason?.id ?? null,
+            match_date: matchData.match_date,
+            result:     matchData.result,
+            created_by: userId,
+          })
+          .select('id')
+          .single()
+
+        if (personalMatch) {
+          await supabase.from('match_players').insert({
+            match_id: personalMatch.id,
+            user_id:  userId,
+            hero_id:  mp.hero_id,
+            kills:    mp.kills,
+            deaths:   mp.deaths,
+            assists:  mp.assists,
+            rating:   mp.rating,
+          })
+        }
       }
     }
 
