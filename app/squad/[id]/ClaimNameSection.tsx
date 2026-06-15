@@ -41,7 +41,7 @@ export default function ClaimNameSection({ squadId, userId, myMapping }: Props) 
       })
 
       // Show names that appear unassigned at least once and aren't fully claimed
-      const allNames = [...new Set((players ?? []).map((p) => p.in_game_name))]
+      const allNames = Array.from(new Set((players ?? []).map((p) => p.in_game_name)))
       const unassignedNames = allNames.filter((name) => {
         const rows = (players ?? []).filter((p) => p.in_game_name === name)
         return rows.some((p) => !p.user_id)
