@@ -40,6 +40,12 @@ export async function POST(req: NextRequest) {
 
 Extract ALL players from BOTH teams and return their data.
 
+IMPORTANT — Player names in Mobile Legends often have a GUILD/CLAN TAG prefix displayed in YELLOW/GOLD colored font before the actual player name. This guild tag is NOT part of the player's name. Strip it completely and return ONLY the white/light colored player name that comes after the yellow prefix.
+Examples:
+- "LER Chou Li Qia Wan" → inGameName should be "Chou Li Qia Wan"
+- "ABC FearNahyar" → inGameName should be "FearNahyar"
+- "Fyruss." (no yellow prefix) → inGameName should be "Fyruss."
+
 For emblem per player, look at the COLOR of the badge/medal icon shown next to their rating number:
 - YELLOW or GOLD colored badge/icon → "gold"
 - GREY or WHITE or SILVER colored badge/icon → "silver"
@@ -54,7 +60,7 @@ Return ONLY a valid JSON object (no markdown, no explanation):
   "result": "win",
   "players": [
     {
-      "inGameName": "player name exactly as shown",
+      "inGameName": "player name only, NO guild tag prefix",
       "heroName": "official Mobile Legends hero name from the portrait",
       "kills": 0,
       "deaths": 0,
