@@ -118,18 +118,22 @@ export default async function SquadDetailPage({ params }: { params: { id: string
         </div>
         <div className="flex flex-wrap gap-2">
           {memberList.map((m) => (
-            <div key={m.user_id} className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-xl">
+            <Link
+              key={m.user_id}
+              href={`/squad/${params.id}/member/${m.user_id}`}
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors group"
+            >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                 style={{ backgroundColor: m.color ?? '#6366f1' }}
               >
                 {(m.display_name || m.username)[0]?.toUpperCase()}
               </div>
-              <span className="text-sm text-white">{m.display_name || m.username}</span>
+              <span className="text-sm text-white group-hover:text-blue-400 transition-colors">{m.display_name || m.username}</span>
               {m.user_id === session.created_by && (
                 <span className="text-[10px] text-yellow-400 font-bold">Owner</span>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </div>

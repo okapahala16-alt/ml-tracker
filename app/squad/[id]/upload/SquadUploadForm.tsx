@@ -162,6 +162,41 @@ export default function SquadUploadForm({ squadId, squadName, userId, members, e
         .upsert(mappingUpserts, { onConflict: 'squad_session_id,in_game_name' })
     }
 
+    // ── Auto-sync to personal match_players ──
+    const assignedPlayers = players.filter((p) => p.assignedUserId)
+    if (assignedPlayers.length > 0) {
+      const { data: activeSeason } = await supabase
+        .from('seasons')
+        .select('id')
+        .eq('is_active', true)
+        .maybeSingle()
+
+      const { data: personalMatch } = await supabase
+        .from('matches')
+        .insert({
+          season_id:  activeSeason?.id ?? null,
+          match_date: today,
+          result,
+          created_by: userId,
+        })
+        .select('id')
+        .single()
+
+      if (personalMatch) {
+        await supabase.from('match_players').insert(
+          assignedPlayers.map((p) => ({
+            match_id: personalMatch.id,
+            user_id:  p.assignedUserId,
+            hero_id:  p.heroId,
+            kills:    p.kills,
+            deaths:   p.deaths,
+            assists:  p.assists,
+            rating:   p.rating > 0 ? p.rating : null,
+          }))
+        )
+      }
+    }
+
     router.push(`/squad/${squadId}`)
     router.refresh()
   }
