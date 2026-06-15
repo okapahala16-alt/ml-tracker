@@ -75,10 +75,10 @@ function Podium({ entries, formatValue }: { entries: RankedEntry[]; formatValue:
       ring: 'ring-amber-600/40', grad: 'from-amber-700 to-orange-800', val: 'text-amber-500' } : null,
   ]
 
-  const barBg: Record<number, string> = {
-    1: 'bg-yellow-500/10 border-yellow-500/20',
-    2: 'bg-slate-700/30 border-slate-600/20',
-    3: 'bg-amber-800/10 border-amber-700/20',
+  const barStyles: Record<number, { background: string; border: string }> = {
+    1: { background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.2)' },
+    2: { background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)' },
+    3: { background: 'rgba(205,127,50,0.08)', border: '1px solid rgba(205,127,50,0.15)' },
   }
 
   return (
@@ -92,11 +92,11 @@ function Podium({ entries, formatValue }: { entries: RankedEntry[]; formatValue:
               {initial(data.player.displayName)}
             </div>
             <div className="text-center max-w-[80px]">
-              <p className="text-xs font-semibold text-white truncate">{data.player.displayName}</p>
-              <p className={`text-sm font-black ${val}`}>{formatValue(data.value)}</p>
-              <p className="text-[10px] text-slate-500">{data.player.games}g</p>
+              <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-inter)' }}>{data.player.displayName}</p>
+              <p className={`text-sm font-black ${val}`} style={{ fontFamily: 'var(--font-orbitron)' }}>{formatValue(data.value)}</p>
+              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{data.player.games}g</p>
             </div>
-            <div className={`w-20 sm:w-24 ${barH} border rounded-t-xl ${barBg[rank]} flex items-center justify-center`}>
+            <div className={`w-20 sm:w-24 ${barH} rounded-t-xl flex items-center justify-center`} style={barStyles[rank]}>
               <span className="text-xl">{medal}</span>
             </div>
           </Link>
@@ -126,17 +126,17 @@ function RankList({
           <Link
             key={player.userId}
             href={`/player/${player.username}`}
-            className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-800/50 transition-colors group"
+            className="flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors hover:bg-[#1A1A26] group"
           >
-            <span className="w-5 text-xs font-bold text-slate-600 text-right shrink-0">{rank}</span>
+            <span className="w-5 text-xs font-bold text-right shrink-0" style={{ color: 'var(--text-muted)' }}>{rank}</span>
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-[11px] font-black text-white shrink-0 group-hover:scale-105 transition-transform">
               {initial(player.displayName)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{player.displayName}</p>
-              <p className="text-[10px] text-slate-500 truncate">@{player.username} · {player.games} games</p>
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{player.displayName}</p>
+              <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>@{player.username} · {player.games} games</p>
             </div>
-            <span className="text-sm font-bold text-white shrink-0">{formatValue(value)}</span>
+            <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{formatValue(value)}</span>
           </Link>
         )
       })}
@@ -158,15 +158,15 @@ function BestCategory({
   const rest  = entries.slice(3)
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 border-b border-slate-800/60 flex items-center gap-2">
+    <div className="card rounded-2xl overflow-hidden">
+      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
         <span className="text-base">{emoji}</span>
-        <h3 className="font-semibold text-white text-sm">{title}</h3>
-        <span className="ml-auto text-[10px] text-slate-600">{entries.length} player</span>
+        <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>{title}</h3>
+        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{entries.length} player</span>
       </div>
 
       {entries.length === 0 ? (
-        <div className="py-8 text-center text-xs text-slate-600 italic">
+        <div className="py-8 text-center text-xs italic" style={{ color: 'var(--text-muted)' }}>
           Belum ada player dengan min. {MIN_GAMES} games.
         </div>
       ) : (
@@ -177,7 +177,7 @@ function BestCategory({
           }
           {rest.length > 0 && (
             <>
-              <div className="border-t border-slate-800/40 my-1 mx-1" />
+              <div className="my-1 mx-1" style={{ borderTop: '1px solid var(--border)' }} />
               <RankList entries={rest} formatValue={formatValue} startRank={4} />
             </>
           )}
@@ -199,19 +199,19 @@ function WorstCategory({
   formatValue: (v: number) => string
 }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 border-b border-slate-800/60 flex items-center gap-2">
+    <div className="card rounded-2xl overflow-hidden">
+      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
         <span className="text-base">{emoji}</span>
         <div>
-          <h3 className="font-semibold text-white text-sm">{title}</h3>
-          {note && <p className="text-[10px] text-slate-600 mt-0.5">{note}</p>}
+          <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>{title}</h3>
+          {note && <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{note}</p>}
         </div>
-        <span className="ml-auto text-[10px] text-slate-600">{entries.length} player</span>
+        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{entries.length} player</span>
       </div>
 
       <div className="px-3 py-3">
         {entries.length === 0 ? (
-          <p className="text-xs text-slate-600 italic py-3 text-center">
+          <p className="text-xs italic py-3 text-center" style={{ color: 'var(--text-muted)' }}>
             Belum ada data cukup.
           </p>
         ) : (
@@ -245,9 +245,12 @@ function HeroTable({ heroes }: { heroes: HeroEntry[] }) {
     return (
       <button
         onClick={() => toggleSort(k)}
-        className={`flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider hover:text-white transition-colors ${
-          active ? 'text-blue-400' : 'text-slate-500'
-        }`}
+        className="flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors hover:opacity-100"
+        style={{
+          fontFamily: 'var(--font-rajdhani)',
+          color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+          opacity: active ? 1 : 0.8,
+        }}
       >
         {label}
         {active && <span className="text-[8px] ml-0.5">{asc ? '▲' : '▼'}</span>}
@@ -258,62 +261,60 @@ function HeroTable({ heroes }: { heroes: HeroEntry[] }) {
   const COLS = 'minmax(0,1.4fr) minmax(0,0.7fr) 4.5rem 4.5rem 4.5rem 4.5rem minmax(0,1fr)'
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 border-b border-slate-800/60 flex items-center gap-2">
-        <h3 className="font-semibold text-white text-sm">Hero Stats</h3>
-        <span className="ml-auto text-[10px] text-slate-600">{heroes.length} hero dipakai</span>
+    <div className="card rounded-2xl overflow-hidden">
+      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
+        <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>Hero Stats</h3>
+        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{heroes.length} hero dipakai</span>
       </div>
 
       {heroes.length === 0 ? (
-        <div className="py-12 text-center text-xs text-slate-600 italic">
+        <div className="py-12 text-center text-xs italic" style={{ color: 'var(--text-muted)' }}>
           Belum ada hero yang dipakai.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <div className="min-w-[640px]">
             {/* Header */}
-            <div className="grid gap-3 px-5 py-3 bg-slate-800/30" style={{ gridTemplateColumns: COLS }}>
-              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Hero</div>
-              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Role</div>
+            <div className="grid gap-3 px-5 py-3" style={{ gridTemplateColumns: COLS, background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
+              <div className="section-label">Hero</div>
+              <div className="section-label">Role</div>
               <ColHeader k="games"     label="Games" />
               <ColHeader k="wr"        label="WR%" />
               <ColHeader k="kda"       label="KDA" />
               <ColHeader k="avgRating" label="Rating" />
-              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Most Used By</div>
+              <div className="section-label">Most Used By</div>
             </div>
 
             {/* Rows */}
-            <div className="divide-y divide-slate-800/50">
+            <div>
               {sorted.map((hero, idx) => (
                 <div
                   key={hero.id}
-                  className={`grid gap-3 px-5 py-3.5 items-center hover:bg-slate-800/20 transition-colors ${
-                    idx < 3 ? 'bg-slate-800/5' : ''
-                  }`}
-                  style={{ gridTemplateColumns: COLS }}
+                  className="grid gap-3 px-5 py-3.5 items-center transition-colors hover:bg-[#1A1A26]"
+                  style={{ gridTemplateColumns: COLS, borderTop: idx > 0 ? '1px solid var(--border)' : undefined }}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {idx === 0 && <span className="text-xs shrink-0">🥇</span>}
                     {idx === 1 && <span className="text-xs shrink-0">🥈</span>}
                     {idx === 2 && <span className="text-xs shrink-0">🥉</span>}
-                    {idx > 2   && <span className="text-[10px] text-slate-600 w-3 shrink-0">{idx + 1}</span>}
-                    <span className="font-medium text-sm text-white truncate">{hero.name}</span>
+                    {idx > 2   && <span className="text-[10px] w-3 shrink-0" style={{ color: 'var(--text-muted)' }}>{idx + 1}</span>}
+                    <span className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{hero.name}</span>
                   </div>
                   <div className={`text-xs capitalize ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>
                     {hero.role}
                   </div>
-                  <div className="text-sm text-white font-semibold">{hero.games}</div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{hero.games}</div>
                   <div className={`text-sm font-semibold ${hero.wr >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                     {hero.wr.toFixed(0)}%
                   </div>
-                  <div className="text-sm text-slate-200">{hero.kda.toFixed(2)}</div>
-                  <div className="text-sm text-slate-300">
-                    {hero.avgRating > 0 ? hero.avgRating.toFixed(1) : <span className="text-slate-600">—</span>}
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{hero.kda.toFixed(2)}</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {hero.avgRating > 0 ? hero.avgRating.toFixed(1) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                   </div>
-                  <div className="text-xs text-slate-400 truncate">
+                  <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
                     {hero.mostUsedBy
-                      ? <Link href={`/player/${hero.mostUsedBy}`} className="hover:text-blue-400 transition-colors">@{hero.mostUsedBy}</Link>
-                      : <span className="text-slate-600">—</span>
+                      ? <Link href={`/player/${hero.mostUsedBy}`} className="transition-colors hover:text-blue-400">@{hero.mostUsedBy}</Link>
+                      : <span style={{ color: 'var(--text-muted)' }}>—</span>
                     }
                   </div>
                 </div>
@@ -405,11 +406,11 @@ export default function LeaderboardTabs({ players, heroes }: Props) {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              tab === t.key
-                ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
-            }`}
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.key ? 'gradient-border' : 'card'}`}
+            style={{
+              fontFamily: 'var(--font-rajdhani)',
+              color: tab === t.key ? 'var(--accent-blue)' : 'var(--text-secondary)',
+            }}
           >
             {t.emoji}
             <span>{t.label}</span>

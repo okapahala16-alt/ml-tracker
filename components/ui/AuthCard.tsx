@@ -8,49 +8,58 @@ interface AuthCardProps {
 
 export default function AuthCard({ children, title, subtitle }: AuthCardProps) {
   return (
-    <div className="min-h-screen bg-[#020209] flex items-center justify-center p-4">
-      {/* Background glow blobs */}
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-base)' }}>
+      {/* Background glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-700/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-700/10 rounded-full blur-3xl" />
+        <div className="absolute -top-60 -left-60 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(79,142,247,0.06) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-60 -right-60 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)' }} />
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-[420px]">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-blue-500/40 blur-xl rounded-full" />
-              <div className="relative p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 shadow-lg shadow-blue-900/50">
-                <Shield className="w-7 h-7 text-white" fill="rgba(255,255,255,0.15)" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-3xl font-black tracking-tight leading-none">
-                <span className="text-white">ML</span>
-                <span className="ml-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  Tracker
-                </span>
-              </h1>
+          <div className="relative mb-4">
+            <div className="absolute inset-0 blur-2xl rounded-full" style={{ background: 'rgba(79,142,247,0.3)' }} />
+            <div className="relative p-3.5 rounded-2xl" style={{ background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)' }}>
+              <Shield className="w-8 h-8 text-white" fill="rgba(255,255,255,0.15)" />
             </div>
           </div>
-          <p className="text-slate-500 text-sm font-medium">
-            Track your Mobile Legends ranked journey
+          <h1
+            className="text-3xl font-black tracking-widest mb-1"
+            style={{
+              fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+              background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            ML TRACKER
+          </h1>
+          <p
+            className="text-sm tracking-widest uppercase"
+            style={{ fontFamily: 'var(--font-rajdhani), Rajdhani, sans-serif', color: 'var(--text-secondary)', fontWeight: 600 }}
+          >
+            Track. Analyze. Dominate.
           </p>
         </div>
 
         {/* Card */}
-        <div className="relative">
-          <div className="absolute -inset-px bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-2xl" />
-          <div className="relative bg-slate-900/90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-white">{title}</h2>
-              {subtitle && (
-                <p className="text-slate-400 text-sm mt-1">{subtitle}</p>
-              )}
-            </div>
-            {children}
+        <div className="gradient-border rounded-2xl p-8" style={{ background: 'var(--bg-card)' }}>
+          <div className="mb-6">
+            <h2
+              className="text-xl font-bold mb-1"
+              style={{ fontFamily: 'var(--font-orbitron), Orbitron, sans-serif', color: 'var(--text-primary)' }}
+            >
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="text-sm" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-rajdhani)' }}>
+                {subtitle}
+              </p>
+            )}
           </div>
+          {children}
         </div>
       </div>
     </div>

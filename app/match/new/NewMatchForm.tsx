@@ -86,35 +86,35 @@ function HeroSelect({ heroes, value, onChange }: {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm border transition-colors ${
-          open ? 'bg-slate-700 border-blue-500' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
-        }`}
+        className="mythic-input w-full flex items-center justify-between gap-2 px-3 py-2 text-sm"
+        style={open ? { borderColor: 'var(--accent-blue)', boxShadow: '0 0 0 2px rgba(79,142,247,0.15)' } : {}}
       >
-        <span className={selected ? 'text-white font-medium' : 'text-slate-500'}>
+        <span style={{ color: selected ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: selected ? 500 : 400 }}>
           {selected ? selected.name : 'Pilih hero...'}
         </span>
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: 'var(--text-secondary)' }} />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl shadow-black/40 overflow-hidden">
-          <div className="p-2 border-b border-slate-700/60">
-            <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-900 rounded-lg">
-              <Search className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+        <div className="absolute z-50 top-full mt-1 w-full rounded-xl shadow-2xl shadow-black/60 overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-glow)' }}>
+          <div className="p-2" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
+              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--text-secondary)' }} />
               <input
                 ref={searchRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari hero..."
-                className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: 'var(--text-primary)' }}
               />
             </div>
           </div>
           <div className="max-h-56 overflow-y-auto">
             {Object.entries(grouped).map(([role, list]) => (
               <div key={role}>
-                <div className="sticky top-0 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500 bg-slate-800/95">
+                <div className="sticky top-0 px-3 py-1 section-label" style={{ background: 'var(--bg-card)' }}>
                   {ROLE_LABELS[role]}
                 </div>
                 {list.map((hero) => (
@@ -122,9 +122,11 @@ function HeroSelect({ heroes, value, onChange }: {
                     key={hero.id}
                     type="button"
                     onClick={() => { onChange(hero.id); setOpen(false); setSearch('') }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                      hero.id === value ? 'text-blue-400 bg-blue-600/10' : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                    }`}
+                    className="w-full text-left px-4 py-2 text-sm transition-colors"
+                    style={{
+                      color: hero.id === value ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                      background: hero.id === value ? 'rgba(79,142,247,0.08)' : 'transparent',
+                    }}
                   >
                     {hero.name}
                   </button>
@@ -132,7 +134,7 @@ function HeroSelect({ heroes, value, onChange }: {
               </div>
             ))}
             {Object.keys(grouped).length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-slate-500">Hero tidak ditemukan</p>
+              <p className="px-3 py-6 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>Hero tidak ditemukan</p>
             )}
           </div>
         </div>
@@ -293,12 +295,23 @@ export default function NewMatchForm({ season, heroes }: Props) {
 
       <div className="p-5 lg:p-8 max-w-2xl mx-auto">
         <div className="mb-7">
-          <h1 className="text-2xl font-bold text-white">Input Match</h1>
-          <p className="text-slate-400 text-sm mt-1">Upload screenshot hasil akhir match</p>
+          <p className="section-label mb-1">Catat Pertandingan</p>
+          <h1
+            className="text-3xl font-black tracking-widest"
+            style={{
+              fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+              background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            INPUT MATCH
+          </h1>
         </div>
 
         {error && (
-          <div className="flex items-start gap-3 px-4 py-3 mb-5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
+          <div className="flex items-start gap-3 px-4 py-3 mb-5 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: 'var(--loss)' }}>
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -306,13 +319,16 @@ export default function NewMatchForm({ season, heroes }: Props) {
 
         {/* ── Step 1: Upload ── */}
         {!scanResult && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center text-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
-              <Camera className="w-7 h-7 text-blue-400" />
+          <div className="card rounded-2xl p-8 flex flex-col items-center text-center gap-4">
+            <div className="relative">
+              <div className="absolute inset-0 blur-2xl rounded-full" style={{ background: 'rgba(79,142,247,0.25)' }} />
+              <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(79,142,247,0.08)', border: '1px solid rgba(79,142,247,0.2)' }}>
+                <Camera className="w-7 h-7" style={{ color: 'var(--accent-blue)' }} />
+              </div>
             </div>
             <div>
-              <p className="text-white font-semibold text-lg">Upload Screenshot Match</p>
-              <p className="text-slate-400 text-sm mt-1">
+              <p className="font-semibold text-lg" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-rajdhani)' }}>Upload Screenshot Match</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
                 Foto scoreboard akhir match — K/D/A, hero, dan hasil dibaca otomatis
               </p>
             </div>
@@ -320,7 +336,7 @@ export default function NewMatchForm({ season, heroes }: Props) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isScanning}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all active:scale-95"
+              className="mythic-btn-primary inline-flex items-center gap-2 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isScanning
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Membaca screenshot...</>
@@ -334,19 +350,24 @@ export default function NewMatchForm({ season, heroes }: Props) {
         {/* ── Step 2: Pick yourself ── */}
         {scanResult && !selectedPlayer && (
           <div className="space-y-4">
-            <div className={`flex items-center justify-center gap-3 py-3 rounded-2xl border font-bold text-base tracking-wide ${
-              scanResult.result === 'win'
-                ? 'bg-green-600/10 border-green-500/30 text-green-400'
-                : 'bg-red-600/10 border-red-500/30 text-red-400'
-            }`}>
+            {/* Result banner */}
+            <div
+              className="flex items-center justify-center gap-3 py-3 rounded-2xl font-black text-base tracking-widest"
+              style={{
+                background: scanResult.result === 'win' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${scanResult.result === 'win' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                color: scanResult.result === 'win' ? 'var(--win)' : 'var(--loss)',
+                fontFamily: 'var(--font-orbitron)',
+              }}
+            >
               <Trophy className="w-4 h-4" />
               {scanResult.result === 'win' ? 'VICTORY' : 'DEFEAT'}
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <div className="card rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <User className="w-4 h-4 text-blue-400" />
-                <p className="text-sm font-semibold text-white">Tap nama kamu</p>
+                <User className="w-4 h-4" style={{ color: 'var(--accent-blue)' }} />
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-rajdhani)' }}>Tap nama kamu</p>
               </div>
               <div className="space-y-2">
                 {scanResult.players.map((player, idx) => (
@@ -354,11 +375,14 @@ export default function NewMatchForm({ season, heroes }: Props) {
                     key={idx}
                     type="button"
                     onClick={() => handlePickPlayer(player)}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500/50 transition-all text-left group"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all text-left"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; e.currentTarget.style.background = 'rgba(79,142,247,0.05)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
                   >
                     <div>
-                      <p className="text-white font-medium text-sm">{player.inGameName}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">{player.heroName} · {player.kills}/{player.deaths}/{player.assists}</p>
+                      <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{player.inGameName}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{player.heroName} · {player.kills}/{player.deaths}/{player.assists}</p>
                     </div>
                     <span className={`text-xs font-bold ${EMBLEM_DISPLAY[player.emblem].color}`}>
                       {EMBLEM_DISPLAY[player.emblem].label}
@@ -371,7 +395,8 @@ export default function NewMatchForm({ season, heroes }: Props) {
             <button
               type="button"
               onClick={() => { setScanResult(null); setError(null) }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors border border-slate-700"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)', fontFamily: 'var(--font-rajdhani)' }}
             >
               <RotateCcw className="w-3.5 h-3.5" /> Scan Ulang
             </button>
@@ -382,22 +407,30 @@ export default function NewMatchForm({ season, heroes }: Props) {
         {scanResult && selectedPlayer && (
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            <div className={`flex items-center justify-center gap-3 py-4 rounded-2xl border font-bold text-lg tracking-wide ${
-              scanResult.result === 'win'
-                ? 'bg-green-600/10 border-green-500/30 text-green-400'
-                : 'bg-red-600/10 border-red-500/30 text-red-400'
-            }`}>
+            {/* Result banner */}
+            <div
+              className="flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-lg tracking-widest"
+              style={{
+                background: scanResult.result === 'win' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${scanResult.result === 'win' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                color: scanResult.result === 'win' ? 'var(--win)' : 'var(--loss)',
+                fontFamily: 'var(--font-orbitron)',
+              }}
+            >
               <Trophy className="w-5 h-5" />
               {scanResult.result === 'win' ? 'VICTORY' : 'DEFEAT'}
             </div>
 
             {/* Stats card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Stats Kamu</p>
+            <div className="card rounded-2xl p-5">
+              <p className="section-label mb-4">Stats Kamu</p>
 
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 border border-slate-700 flex items-center justify-center shrink-0">
-                  <Swords className="w-6 h-6 text-blue-400" />
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.2)' }}
+                >
+                  <Swords className="w-6 h-6" style={{ color: 'var(--accent-blue)' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   {editingHero ? (
@@ -408,32 +441,33 @@ export default function NewMatchForm({ season, heroes }: Props) {
                         onChange={(id) => { setOverrideHeroId(id); setEditingHero(false) }}
                       />
                       {aiHeroName && (
-                        <p className="text-xs text-slate-500">AI mendeteksi: <span className="text-slate-400">{aiHeroName}</span></p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>AI mendeteksi: <span style={{ color: 'var(--text-primary)' }}>{aiHeroName}</span></p>
                       )}
                     </div>
                   ) : (
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-white font-bold text-lg">
-                          {selectedHero?.name ?? <span className="text-amber-400 text-base">Pilih hero</span>}
+                        <p className="font-bold text-lg" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-orbitron)' }}>
+                          {selectedHero?.name ?? <span style={{ color: 'var(--gold)' }} className="text-base">Pilih hero</span>}
                         </p>
                         <button
                           type="button"
                           onClick={() => setEditingHero(true)}
-                          className="p-1 rounded-md text-slate-500 hover:text-blue-400 hover:bg-slate-800 transition-colors"
+                          className="p-1 rounded-md transition-colors"
+                          style={{ color: 'var(--text-secondary)' }}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                       </div>
                       {selectedHero && (
-                        <p className="text-xs text-blue-400 font-medium">
+                        <p className="text-xs font-medium" style={{ color: 'var(--accent-blue)' }}>
                           {ROLE_LABELS[selectedHero.role]?.replace(/^\S+\s/, '') ?? selectedHero.role}
                         </p>
                       )}
                       {heroMismatch && (
-                        <p className="text-[11px] text-amber-500 mt-0.5">AI mendeteksi: {aiHeroName}</p>
+                        <p className="text-[11px] mt-0.5" style={{ color: 'var(--gold)' }}>AI mendeteksi: {aiHeroName}</p>
                       )}
-                      <p className="text-xs text-slate-500 mt-0.5">{selectedPlayer.inGameName}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{selectedPlayer.inGameName}</p>
                     </div>
                   )}
                 </div>
@@ -441,36 +475,36 @@ export default function NewMatchForm({ season, heroes }: Props) {
 
               <div className="grid grid-cols-4 gap-3">
                 {[
-                  { label: 'Kills',   value: selectedPlayer.kills,   color: 'text-green-400'  },
-                  { label: 'Deaths',  value: selectedPlayer.deaths,  color: 'text-red-400'    },
-                  { label: 'Assists', value: selectedPlayer.assists, color: 'text-blue-400'   },
-                  { label: 'Rating',  value: selectedPlayer.rating,  color: 'text-yellow-400' },
+                  { label: 'Kills',   value: selectedPlayer.kills,   color: 'var(--win)'  },
+                  { label: 'Deaths',  value: selectedPlayer.deaths,  color: 'var(--loss)'    },
+                  { label: 'Assists', value: selectedPlayer.assists, color: 'var(--accent-blue)'   },
+                  { label: 'Rating',  value: selectedPlayer.rating,  color: 'var(--gold)' },
                 ].map(({ label, value, color }) => (
-                  <div key={label} className="bg-slate-800 rounded-xl p-3 text-center">
-                    <p className={`text-xl font-bold ${color}`}>{value}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 font-medium uppercase tracking-wide">{label}</p>
+                  <div key={label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
+                    <p className="text-xl font-bold" style={{ color, fontFamily: 'var(--font-orbitron)' }}>{value}</p>
+                    <p className="section-label mt-0.5">{label}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Emblem */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+            <div className="card rounded-2xl p-5 flex items-center gap-4">
               <div className="flex-1">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Emblem</p>
-                <p className={`text-lg font-black tracking-widest ${EMBLEM_DISPLAY[selectedPlayer.emblem].color}`}>
+                <p className="section-label mb-1">Emblem</p>
+                <p className={`text-lg font-black tracking-widest ${EMBLEM_DISPLAY[selectedPlayer.emblem].color}`} style={{ fontFamily: 'var(--font-orbitron)' }}>
                   {EMBLEM_DISPLAY[selectedPlayer.emblem].label}
                 </p>
               </div>
-              <p className="text-xs text-slate-600 text-right">Dibaca dari<br />screenshot</p>
+              <p className="text-xs text-right" style={{ color: 'var(--text-muted)' }}>Dibaca dari<br />screenshot</p>
             </div>
 
             {/* Season */}
             {season && (
-              <div className="flex items-center gap-2.5 px-4 py-3 bg-slate-900 border border-slate-800 rounded-2xl">
-                <span className="w-2 h-2 rounded-full bg-green-400 shrink-0 animate-pulse" />
-                <span className="text-sm text-white">{season.name}</span>
-                <span className="ml-auto text-[10px] font-semibold text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded">AKTIF</span>
+              <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: 'var(--win)' }} />
+                <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{season.name}</span>
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ color: 'var(--win)', background: 'rgba(34,197,94,0.1)', fontFamily: 'var(--font-rajdhani)' }}>AKTIF</span>
               </div>
             )}
 
@@ -479,14 +513,15 @@ export default function NewMatchForm({ season, heroes }: Props) {
               <button
                 type="button"
                 onClick={() => { setSelectedPlayer(null); setOverrideHeroId(''); setEditingHero(false) }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors border border-slate-700"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)', fontFamily: 'var(--font-rajdhani)' }}
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Pilih Ulang
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-900/30 transition-all active:scale-[0.98]"
+                className="flex-1 mythic-btn-primary flex items-center justify-center gap-2 px-6 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting
                   ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

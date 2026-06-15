@@ -252,13 +252,13 @@ export default async function DashboardPage({
 
       {/* No active season warning */}
       {!activeSeason && (
-        <div className="flex items-start gap-3 px-4 py-3.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 rounded-xl text-sm">
+        <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl text-sm" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--gold)' }}>
           <span className="text-base shrink-0">⚠️</span>
-          <div>
+          <div style={{ fontFamily: 'var(--font-rajdhani)' }}>
             <span className="font-medium">Belum ada season aktif. </span>
             {isAdmin
-              ? <Link href="/seasons" className="underline underline-offset-2 hover:text-yellow-200 transition-colors">Buat atau aktifkan season →</Link>
-              : <span className="text-yellow-400/80">Hubungi admin untuk membuat season.</span>
+              ? <Link href="/seasons" className="underline underline-offset-2 transition-colors" style={{ color: 'var(--gold)' }}>Buat atau aktifkan season →</Link>
+              : <span style={{ opacity: 0.7 }}>Hubungi admin untuk membuat season.</span>
             }
           </div>
         </div>
@@ -267,12 +267,21 @@ export default async function DashboardPage({
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="text-slate-400 text-sm">Selamat datang kembali</p>
-          <h1 className="text-3xl font-black tracking-tight text-white">
-            {displayName}
+          <p className="section-label mb-1">Selamat datang kembali</p>
+          <h1
+            className="text-3xl font-black tracking-widest"
+            style={{
+              fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+              background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            WELCOME BACK, {displayName.toUpperCase()}
           </h1>
           {activeSeason && (
-            <p className="text-slate-500 text-sm mt-1 flex items-center gap-1.5">
+            <p className="flex items-center gap-1.5 mt-1.5 text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-secondary)' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
               {activeSeason.name}
             </p>
@@ -280,7 +289,7 @@ export default async function DashboardPage({
         </div>
         <Link
           href="/match/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-900/30 transition-all active:scale-95"
+          className="mythic-btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm"
         >
           <PlusCircle className="w-4 h-4" />
           Log Match
@@ -289,16 +298,16 @@ export default async function DashboardPage({
 
       {/* ── SECTION 1: Personal stats ── */}
       <section>
-        <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">
+        <h2 className="section-label mb-4">
           Statistik Kamu{activeSeason ? ` · ${activeSeason.name}` : ' · Semua Waktu'}
         </h2>
 
         {myTotal === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
-            <Activity className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400 text-sm">
+          <div className="card rounded-2xl p-8 text-center">
+            <Activity className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {activeSeason ? 'Belum ada match di season ini.' : 'Belum ada match.'}{' '}
-              <Link href="/match/new" className="text-blue-400 hover:text-blue-300">
+              <Link href="/match/new" className="transition-colors" style={{ color: 'var(--accent-blue)' }}>
                 Log sekarang →
               </Link>
             </p>
@@ -306,19 +315,19 @@ export default async function DashboardPage({
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Match */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Match</p>
-              <p className="text-3xl font-black text-white mt-1">{myTotal}</p>
-              <p className="text-xs text-slate-500 mt-1">{myWins}W · {myTotal - myWins}L</p>
+            <div className="card rounded-2xl p-5">
+              <p className="section-label mb-1">Total Match</p>
+              <p className="stat-number">{myTotal}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{myWins}W · {myTotal - myWins}L</p>
             </div>
 
             {/* Win Rate */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Win Rate</p>
-              <p className={`text-3xl font-black mt-1 ${wrColor(myWR)}`}>
+            <div className="card rounded-2xl p-5">
+              <p className="section-label mb-1">Win Rate</p>
+              <p className={`text-3xl font-black mt-1 ${wrColor(myWR)}`} style={{ fontFamily: 'var(--font-orbitron)' }}>
                 {myWR.toFixed(1)}%
               </p>
-              <div className="mt-2 w-full bg-slate-700/40 rounded-full h-1 overflow-hidden">
+              <div className="mt-2 w-full rounded-full h-1 overflow-hidden" style={{ background: 'var(--border)' }}>
                 <div
                   className={`h-1 rounded-full transition-all ${wrBarColor(myWR)}`}
                   style={{ width: `${Math.min(myWR, 100)}%` }}
@@ -327,25 +336,25 @@ export default async function DashboardPage({
             </div>
 
             {/* Best Hero */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Best Hero</p>
+            <div className="card rounded-2xl p-5">
+              <p className="section-label mb-1">Best Hero</p>
               {myBestHero ? (
                 <>
-                  <p className="text-xl font-black text-white mt-1 truncate">{myBestHero.name}</p>
-                  <p className="text-xs text-slate-500 mt-1 capitalize">
+                  <p className="text-xl font-black mt-1 truncate" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-orbitron)' }}>{myBestHero.name}</p>
+                  <p className="text-xs mt-1 capitalize" style={{ color: 'var(--text-secondary)' }}>
                     {myBestHero.role} · {myBestHero.count}x pakai
                   </p>
                 </>
               ) : (
-                <p className="text-2xl font-black text-slate-600 mt-1">—</p>
+                <p className="text-2xl font-black mt-1" style={{ color: 'var(--text-muted)' }}>—</p>
               )}
             </div>
 
             {/* Avg KDA */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Avg KDA</p>
-              <p className="text-3xl font-black text-white mt-1">{myKDA}</p>
-              <p className="text-xs text-slate-500 mt-1">
+            <div className="card rounded-2xl p-5">
+              <p className="section-label mb-1">Avg KDA</p>
+              <p className="stat-number">{myKDA}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                 {(myTotK / myTotal).toFixed(1)} /{' '}
                 {(myTotD / myTotal).toFixed(1)} /{' '}
                 {(myTotA / myTotal).toFixed(1)}
@@ -358,16 +367,14 @@ export default async function DashboardPage({
       {/* ── SECTION 2: Player cards ── */}
       <section>
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-          <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-            Semua Player · All Time
-          </h2>
+          <h2 className="section-label">Semua Player · All Time</h2>
           <SortToggle current={sortParam} />
         </div>
 
         {playerCards.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
-            <Users className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400 text-sm">Belum ada player terdaftar.</p>
+          <div className="card rounded-2xl p-8 text-center">
+            <Users className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Belum ada player terdaftar.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -376,25 +383,29 @@ export default async function DashboardPage({
               const isMe    = profile.id === user.id
               return (
                 <Link key={profile.id} href={`/player/${profile.username}`}>
-                  <div className={`relative group bg-slate-900 border rounded-2xl p-5 hover:border-slate-600 hover:-translate-y-0.5 transition-all cursor-pointer ${
-                    isMe ? 'border-blue-500/30 bg-blue-500/5' : 'border-slate-800'
-                  }`}>
+                  <div className={`relative group rounded-2xl p-5 transition-all cursor-pointer hover:-translate-y-0.5 ${isMe ? 'gradient-border' : 'card'}`}>
                     {isMe && (
-                      <span className="absolute top-3 right-3 text-[10px] font-bold text-blue-400 bg-blue-500/15 border border-blue-500/20 px-1.5 py-0.5 rounded-full">
+                      <span
+                        className="absolute top-3 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                        style={{ color: 'var(--accent-blue)', background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.2)', fontFamily: 'var(--font-rajdhani)' }}
+                      >
                         Kamu
                       </span>
                     )}
 
                     {/* Avatar + name */}
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-black text-white shrink-0" style={{ backgroundColor: profile.color ?? '#6366f1' }}>
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-black text-white shrink-0"
+                        style={{ backgroundColor: profile.color ?? '#6366f1' }}
+                      >
                         {initial}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">
+                        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                           {profile.display_name || profile.username}
                         </p>
-                        <p className="text-xs text-slate-500 truncate">@{profile.username}</p>
+                        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>@{profile.username}</p>
                       </div>
                     </div>
 
@@ -405,13 +416,13 @@ export default async function DashboardPage({
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${wrBadgeClass(wr)}`}>
                             {wrLabel(wr)}
                           </span>
-                          <span className={`text-sm font-black ${wrColor(wr)}`}>
+                          <span className={`text-sm font-black ${wrColor(wr)}`} style={{ fontFamily: 'var(--font-orbitron)' }}>
                             {wr.toFixed(0)}%
                           </span>
                         </div>
 
                         {/* WR bar */}
-                        <div className="w-full bg-slate-700/40 rounded-full h-1 mb-4 overflow-hidden">
+                        <div className="w-full rounded-full h-1 mb-4 overflow-hidden" style={{ background: 'var(--border)' }}>
                           <div
                             className={`h-1 rounded-full ${wrBarColor(wr)}`}
                             style={{ width: `${Math.min(wr, 100)}%` }}
@@ -419,24 +430,24 @@ export default async function DashboardPage({
                         </div>
 
                         {/* Stats row */}
-                        <div className="flex items-center justify-between text-xs text-slate-400">
+                        <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
                           <span>{games} game{games !== 1 ? 's' : ''}</span>
-                          <span>KDA <span className="text-white font-semibold">{avgKDA}</span></span>
+                          <span>KDA <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{avgKDA}</span></span>
                         </div>
 
                         {/* Top hero */}
                         {topHero && (
-                          <div className="mt-3 pt-3 border-t border-slate-800/60">
-                            <p className="text-[10px] text-slate-600 uppercase tracking-widest mb-0.5">Top Hero</p>
-                            <p className="text-xs font-medium text-slate-300 truncate">
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                            <p className="section-label mb-0.5">Top Hero</p>
+                            <p className="text-xs font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
                               {topHero.name}
-                              <span className="ml-1.5 text-slate-600 capitalize">({topHero.role})</span>
+                              <span className="ml-1.5 capitalize" style={{ color: 'var(--text-muted)' }}>({topHero.role})</span>
                             </p>
                           </div>
                         )}
                       </>
                     ) : (
-                      <p className="text-xs text-slate-600 italic">Belum ada match</p>
+                      <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>Belum ada match</p>
                     )}
                   </div>
                 </Link>
@@ -451,18 +462,16 @@ export default async function DashboardPage({
 
         {/* SECTION 3: Recent Activity */}
         <section className="lg:col-span-3">
-          <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">
-            Aktivitas Terbaru
-          </h2>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+          <h2 className="section-label mb-4">Aktivitas Terbaru</h2>
+          <div className="card rounded-2xl overflow-hidden">
             {recentMatches.length === 0 ? (
               <div className="p-8 text-center">
-                <Shield className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-                <p className="text-slate-400 text-sm">Belum ada match tersimpan.</p>
+                <Shield className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Belum ada match tersimpan.</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/60">
-                {recentMatches.map((match) => {
+              <div>
+                {recentMatches.map((match, i) => {
                   const isWin    = match.result === 'win'
                   const creator  = profileMap[match.created_by] ?? null
                   const dateStr  = format(new Date(match.match_date), 'dd MMM', { locale: idLocale })
@@ -475,27 +484,30 @@ export default async function DashboardPage({
                     <Link
                       key={match.id}
                       href={`/match/${match.id}`}
-                      className="flex items-center gap-3 px-5 py-4 hover:bg-slate-800/30 transition-colors"
+                      className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-[#1A1A26]"
+                      style={{
+                        borderLeft: `3px solid ${isWin ? 'var(--win)' : 'var(--loss)'}`,
+                        borderTop: i > 0 ? '1px solid var(--border)' : undefined,
+                      }}
                     >
                       {/* W/L badge */}
-                      <span className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-xs font-black border ${
-                        isWin
-                          ? 'bg-green-500/15 text-green-400 border-green-500/20'
-                          : 'bg-red-500/15 text-red-400 border-red-500/20'
-                      }`}>
-                        {isWin ? 'W' : 'L'}
+                      <span className={isWin ? 'win-badge' : 'loss-badge'}>
+                        {isWin ? 'WIN' : 'LOSS'}
                       </span>
 
                       {/* Creator info */}
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: creator?.color ?? '#6366f1' }}>
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                          style={{ backgroundColor: creator?.color ?? '#6366f1' }}
+                        >
                           {creatorInitial}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm text-white font-medium truncate">
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                             {creator?.username ?? 'Unknown'}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                             {dateStr} · {timeStr} · {pCount} player{pCount !== 1 ? 's' : ''}
                           </p>
                         </div>
@@ -503,7 +515,7 @@ export default async function DashboardPage({
 
                       {/* Season tag */}
                       {match.seasons?.name && (
-                        <span className="text-[10px] text-slate-600 shrink-0 hidden sm:block">
+                        <span className="text-[10px] shrink-0 hidden sm:block" style={{ color: 'var(--text-muted)' }}>
                           {match.seasons.name}
                         </span>
                       )}
@@ -513,8 +525,8 @@ export default async function DashboardPage({
               </div>
             )}
             {recentMatches.length > 0 && (
-              <div className="px-5 py-3 border-t border-slate-800/60">
-                <Link href="/matches" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+              <div className="px-5 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+                <Link href="/matches" className="text-xs transition-colors" style={{ color: 'var(--accent-blue)' }}>
                   Lihat semua riwayat →
                 </Link>
               </div>
@@ -524,50 +536,50 @@ export default async function DashboardPage({
 
         {/* SECTION 4: Quick Stats */}
         <section className="lg:col-span-2">
-          <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">
+          <h2 className="section-label mb-4">
             Quick Stats{activeSeason ? ` · ${activeSeason.name}` : ' · All Time'}
           </h2>
           <div className="space-y-3">
 
             {/* Total matches */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/15 shrink-0">
-                <Activity className="w-5 h-5 text-blue-400" />
+            <div className="card rounded-2xl p-5 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl shrink-0" style={{ background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.15)' }}>
+                <Activity className="w-5 h-5" style={{ color: 'var(--accent-blue)' }} />
               </div>
               <div>
-                <p className="text-xs text-slate-400">Total Match</p>
-                <p className="text-2xl font-black text-white">{totalSeasonMatches}</p>
+                <p className="section-label">Total Match</p>
+                <p className="text-2xl font-black" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-orbitron)' }}>{totalSeasonMatches}</p>
               </div>
             </div>
 
             {/* Popular hero */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/15 shrink-0">
-                <Flame className="w-5 h-5 text-purple-400" />
+            <div className="card rounded-2xl p-5 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl shrink-0" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                <Flame className="w-5 h-5" style={{ color: 'var(--accent-purple)' }} />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-slate-400">Hero Populer</p>
-                <p className="text-lg font-black text-white truncate">
+                <p className="section-label">Hero Populer</p>
+                <p className="text-lg font-black truncate" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-orbitron)' }}>
                   {popularHero?.name ?? '—'}
                 </p>
                 {popularHero && (
-                  <p className="text-[10px] text-slate-500">{popularHero.count}× dipilih</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{popularHero.count}× dipilih</p>
                 )}
               </div>
             </div>
 
             {/* Most active player */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-green-500/10 border border-green-500/15 shrink-0">
-                <Trophy className="w-5 h-5 text-green-400" />
+            <div className="card rounded-2xl p-5 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl shrink-0" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                <Trophy className="w-5 h-5" style={{ color: 'var(--win)' }} />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-slate-400">Player Teraktif</p>
-                <p className="text-lg font-black text-white truncate">
+                <p className="section-label">Player Teraktif</p>
+                <p className="text-lg font-black truncate" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-orbitron)' }}>
                   {mostActiveProfile?.username ?? '—'}
                 </p>
                 {mostActiveCount > 0 && (
-                  <p className="text-[10px] text-slate-500">{mostActiveCount} match</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{mostActiveCount} match</p>
                 )}
               </div>
             </div>

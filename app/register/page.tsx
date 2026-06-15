@@ -162,7 +162,7 @@ export default function RegisterPage() {
               placeholder="hero_123"
               required
               autoComplete="username"
-              className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors text-sm"
+              className="mythic-input w-full px-3 py-2.5 text-sm"
             />
           </div>
 
@@ -177,7 +177,7 @@ export default function RegisterPage() {
               onChange={field('displayName')}
               placeholder="Hero Player"
               autoComplete="nickname"
-              className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors text-sm"
+              className="mythic-input w-full px-3 py-2.5 text-sm"
             />
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function RegisterPage() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors"
+            className="mythic-input w-full px-4 py-3"
           />
         </div>
 
@@ -219,7 +219,7 @@ export default function RegisterPage() {
               placeholder="Min. 6 characters"
               required
               autoComplete="new-password"
-              className="w-full px-4 py-3 pr-11 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors"
+              className="mythic-input w-full px-4 py-3 pr-11"
             />
             <button
               type="button"
@@ -246,7 +246,7 @@ export default function RegisterPage() {
               placeholder="••••••••"
               required
               autoComplete="new-password"
-              className="w-full px-4 py-3 pr-11 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors"
+              className="mythic-input w-full px-4 py-3 pr-11"
             />
             <button
               type="button"
@@ -263,7 +263,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-900/30 transition-all duration-200 flex items-center justify-center gap-2 mt-2"
+          className="mythic-btn-primary w-full py-3 px-4 flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

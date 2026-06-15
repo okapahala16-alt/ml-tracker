@@ -215,27 +215,36 @@ export default async function PlayerProfilePage({
     <div className="p-5 lg:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* ── SECTION 1: Header ── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div className="gradient-border rounded-2xl p-6" style={{ background: 'var(--bg-card)' }}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
 
           {/* Avatar + names */}
           <div className="flex items-center gap-4">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-blue-500/30 blur-xl rounded-full" />
-              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-2xl font-black text-white shadow-lg">
+              <div className="absolute inset-0 blur-xl rounded-full" style={{ background: 'rgba(79,142,247,0.3)' }} />
+              <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg" style={{ background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)' }}>
                 {initial}
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">
-                {profile.display_name || profile.username}
+              <h1
+                className="text-2xl font-black tracking-wide"
+                style={{
+                  fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+                  background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {(profile.display_name || profile.username).toUpperCase()}
               </h1>
-              <p className="text-slate-400 text-sm">@{profile.username}</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-rajdhani)' }}>@{profile.username}</p>
               <div className="flex items-center gap-2 mt-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${rank.bg} ${rank.text} ${rank.border}`}>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${rank.bg} ${rank.text} ${rank.border}`} style={{ fontFamily: 'var(--font-rajdhani)' }}>
                   {rank.label}
                 </span>
-                <span className="text-slate-500 text-xs">{total} match</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{total} match</span>
               </div>
             </div>
           </div>
@@ -244,12 +253,12 @@ export default async function PlayerProfilePage({
           <div className="flex flex-col items-start sm:items-end gap-3">
             <SeasonFilter seasons={seasons} selected={selected} />
             {total > 0 && (
-              <div className="flex items-center gap-3 text-sm">
-                <span className="flex items-center gap-1 text-green-400 font-semibold">
+              <div className="flex items-center gap-3 text-sm" style={{ fontFamily: 'var(--font-rajdhani)' }}>
+                <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--win)' }}>
                   <TrendingUp className="w-3.5 h-3.5" /> {wins}W
                 </span>
-                <span className="text-slate-600">·</span>
-                <span className="flex items-center gap-1 text-red-400 font-semibold">
+                <span style={{ color: 'var(--border-glow)' }}>·</span>
+                <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--loss)' }}>
                   <TrendingDown className="w-3.5 h-3.5" /> {losses}L
                 </span>
               </div>
@@ -260,60 +269,60 @@ export default async function PlayerProfilePage({
 
       {/* ── SECTION 2: Stats Grid 2×3 ── */}
       {total === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-          <p className="text-slate-400">Belum ada data match{selected !== 'all' ? ' untuk season ini' : ''}.</p>
+        <div className="card rounded-2xl p-10 text-center">
+          <p style={{ color: 'var(--text-secondary)' }}>Belum ada data match{selected !== 'all' ? ' untuk season ini' : ''}.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
 
-          {/* Win Rate — with progress bar */}
-          <div className={`col-span-2 lg:col-span-1 bg-slate-900 border rounded-2xl p-5 ${rank.border}`}>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Win Rate</p>
-            <p className={`text-3xl font-black mt-1 tracking-tight ${rank.text}`}>
+          {/* Win Rate */}
+          <div className={`col-span-2 lg:col-span-1 card rounded-2xl p-5 ${rank.border}`}>
+            <p className="section-label mb-1">Win Rate</p>
+            <p className={`text-3xl font-black tracking-tight ${rank.text}`} style={{ fontFamily: 'var(--font-orbitron)' }}>
               {winRate.toFixed(1)}%
             </p>
-            <div className="mt-3 w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+            <div className="mt-3 w-full rounded-full h-1.5 overflow-hidden" style={{ background: 'var(--border)' }}>
               <div
                 className={`h-1.5 rounded-full transition-all ${rank.bar}`}
                 style={{ width: `${Math.min(winRate, 100)}%` }}
               />
             </div>
-            <p className="text-xs text-slate-500 mt-2">{wins}W · {losses}L · {total} match</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>{wins}W · {losses}L · {total} match</p>
           </div>
 
           {/* KDA Ratio */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">KDA Ratio</p>
-            <p className="text-3xl font-black text-white mt-1 tracking-tight">{kdaRatio}</p>
-            <p className="text-xs text-slate-500 mt-2">(K+A) / D</p>
+          <div className="card rounded-2xl p-5">
+            <p className="section-label mb-1">KDA Ratio</p>
+            <p className="stat-number">{kdaRatio}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>(K+A) / D</p>
           </div>
 
           {/* Avg Kills */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Kills</p>
-            <p className="text-3xl font-black text-blue-400 mt-1 tracking-tight">{avg(totK, total)}</p>
-            <p className="text-xs text-slate-500 mt-2">per match</p>
+          <div className="card rounded-2xl p-5">
+            <p className="section-label mb-1">Avg Kills</p>
+            <p className="text-3xl font-black tracking-tight" style={{ fontFamily: 'var(--font-orbitron)', color: 'var(--accent-blue)' }}>{avg(totK, total)}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>per match</p>
           </div>
 
           {/* Avg Deaths */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Deaths</p>
-            <p className="text-3xl font-black text-red-400 mt-1 tracking-tight">{avg(totD, total)}</p>
-            <p className="text-xs text-slate-500 mt-2">per match</p>
+          <div className="card rounded-2xl p-5">
+            <p className="section-label mb-1">Avg Deaths</p>
+            <p className="text-3xl font-black tracking-tight" style={{ fontFamily: 'var(--font-orbitron)', color: 'var(--loss)' }}>{avg(totD, total)}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>per match</p>
           </div>
 
           {/* Avg Assists */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Assists</p>
-            <p className="text-3xl font-black text-purple-400 mt-1 tracking-tight">{avg(totA, total)}</p>
-            <p className="text-xs text-slate-500 mt-2">per match</p>
+          <div className="card rounded-2xl p-5">
+            <p className="section-label mb-1">Avg Assists</p>
+            <p className="text-3xl font-black tracking-tight" style={{ fontFamily: 'var(--font-orbitron)', color: 'var(--accent-purple)' }}>{avg(totA, total)}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>per match</p>
           </div>
 
           {/* Avg Rating */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Rating</p>
-            <p className="text-3xl font-black text-yellow-400 mt-1 tracking-tight">{avg(totR, total)}</p>
-            <p className="text-xs text-slate-500 mt-2">/ 10.0</p>
+          <div className="card rounded-2xl p-5">
+            <p className="section-label mb-1">Avg Rating</p>
+            <p className="text-3xl font-black tracking-tight" style={{ fontFamily: 'var(--font-orbitron)', color: 'var(--gold)' }}>{avg(totR, total)}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>/ 10.0</p>
           </div>
         </div>
       )}
@@ -325,43 +334,48 @@ export default async function PlayerProfilePage({
 
       {/* ── SECTION 4: Hero Stats ── */}
       {heroStats.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-800">
-            <h2 className="font-semibold text-white">Hero Stats</h2>
+        <div className="card rounded-2xl overflow-hidden">
+          <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <h2 className="font-semibold" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)', fontSize: '1rem' }}>Hero Stats</h2>
             {bestHeroId && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                Hero terbaik: <span className="text-blue-400">{heroStats.find(h => h.id === bestHeroId)?.name}</span>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                Hero terbaik: <span style={{ color: 'var(--accent-blue)' }}>{heroStats.find(h => h.id === bestHeroId)?.name}</span>
               </p>
             )}
           </div>
 
           {/* Table header */}
-          <div className="hidden sm:grid px-6 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-800/30"
-            style={{ gridTemplateColumns: '1.8fr 70px 48px 48px 80px 90px 80px' }}>
+          <div
+            className="hidden sm:grid px-6 py-3"
+            style={{ gridTemplateColumns: '1.8fr 70px 48px 48px 80px 90px 80px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}
+          >
             {['Hero', 'Games', 'W', 'L', 'Win %', 'Avg KDA', 'Avg Rtg'].map((h) => (
-              <div key={h} className="first:text-left text-center">{h}</div>
+              <div key={h} className="section-label first:text-left text-center">{h}</div>
             ))}
           </div>
 
-          <div className="divide-y divide-slate-800/50">
-            {heroStats.map((hero) => {
+          <div>
+            {heroStats.map((hero, idx) => {
               const isBest = hero.id === bestHeroId
               return (
                 <div
                   key={hero.id}
-                  className={`px-6 py-3.5 transition-colors hover:bg-slate-800/30 ${
-                    isBest ? 'bg-blue-500/5 border-l-2 border-blue-500/50' : ''
-                  }`}
+                  className="transition-colors hover:bg-[#1A1A26]"
+                  style={{
+                    borderTop: idx > 0 ? '1px solid var(--border)' : undefined,
+                    borderLeft: isBest ? '3px solid var(--accent-blue)' : undefined,
+                    background: isBest ? 'rgba(79,142,247,0.03)' : undefined,
+                  }}
                 >
                   {/* Mobile */}
-                  <div className="flex items-center justify-between sm:hidden">
+                  <div className="flex items-center justify-between px-6 py-3.5 sm:hidden">
                     <div>
-                      <span className="text-sm font-medium text-white">{hero.name}</span>
-                      {isBest && <span className="ml-2 text-[10px] text-blue-400 font-semibold">BEST</span>}
+                      <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{hero.name}</span>
+                      {isBest && <span className="ml-2 text-[10px] font-semibold" style={{ color: 'var(--accent-blue)' }}>BEST</span>}
                       <p className={`text-xs capitalize mt-0.5 ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>{hero.role}</p>
                     </div>
                     <div className="text-right text-sm">
-                      <p className="text-white">{hero.games}G · {hero.wins}W · {hero.losses}L</p>
+                      <p style={{ color: 'var(--text-primary)' }}>{hero.games}G · {hero.wins}W · {hero.losses}L</p>
                       <p className={`text-xs font-semibold ${hero.winRate >= 60 ? 'text-blue-400' : hero.winRate >= 50 ? 'text-green-400' : hero.winRate >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
                         {hero.winRate.toFixed(0)}% · KDA {hero.avgKDA}
                       </p>
@@ -369,20 +383,22 @@ export default async function PlayerProfilePage({
                   </div>
 
                   {/* Desktop */}
-                  <div className="hidden sm:grid items-center"
-                    style={{ gridTemplateColumns: '1.8fr 70px 48px 48px 80px 90px 80px' }}>
+                  <div
+                    className="hidden sm:grid items-center px-6 py-3.5"
+                    style={{ gridTemplateColumns: '1.8fr 70px 48px 48px 80px 90px 80px' }}
+                  >
                     <div>
-                      <span className="text-sm font-medium text-white">{hero.name}</span>
+                      <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{hero.name}</span>
                       {isBest && (
-                        <span className="ml-2 text-[9px] font-bold text-blue-400 bg-blue-500/15 border border-blue-500/20 px-1.5 py-0.5 rounded-full">
+                        <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: 'var(--accent-blue)', background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.2)' }}>
                           BEST
                         </span>
                       )}
                       <p className={`text-xs capitalize mt-0.5 ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>{hero.role}</p>
                     </div>
-                    <div className="text-center text-sm text-slate-300 font-medium">{hero.games}</div>
-                    <div className="text-center text-sm text-green-400 font-medium">{hero.wins}</div>
-                    <div className="text-center text-sm text-red-400 font-medium">{hero.losses}</div>
+                    <div className="text-center text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{hero.games}</div>
+                    <div className="text-center text-sm font-medium" style={{ color: 'var(--win)' }}>{hero.wins}</div>
+                    <div className="text-center text-sm font-medium" style={{ color: 'var(--loss)' }}>{hero.losses}</div>
                     <div className={`text-center text-sm font-bold ${
                       hero.winRate >= 60 ? 'text-blue-400'
                       : hero.winRate >= 50 ? 'text-green-400'
@@ -391,8 +407,8 @@ export default async function PlayerProfilePage({
                     }`}>
                       {hero.winRate.toFixed(0)}%
                     </div>
-                    <div className="text-center text-sm text-slate-300">{hero.avgKDA}</div>
-                    <div className="text-center text-sm text-yellow-400">{hero.avgRating}</div>
+                    <div className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>{hero.avgKDA}</div>
+                    <div className="text-center text-sm" style={{ color: 'var(--gold)' }}>{hero.avgRating}</div>
                   </div>
                 </div>
               )
@@ -403,21 +419,18 @@ export default async function PlayerProfilePage({
 
       {/* ── SECTION 5: Recent Matches ── */}
       {recentRows.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-            <h2 className="font-semibold text-white">10 Match Terakhir</h2>
+        <div className="card rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <h2 className="font-semibold" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)', fontSize: '1rem' }}>10 Match Terakhir</h2>
             {isOwnProfile && (
-              <Link
-                href="/matches"
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-              >
+              <Link href="/matches" className="text-xs transition-colors" style={{ color: 'var(--accent-blue)' }}>
                 Lihat semua →
               </Link>
             )}
           </div>
 
-          <div className="divide-y divide-slate-800/50">
-            {recentRows.map((mp) => {
+          <div>
+            {recentRows.map((mp, idx) => {
               const isWin    = mp.matches?.result === 'win'
               const dateStr  = mp.matches?.match_date
                 ? format(new Date(mp.matches.match_date), 'dd MMM yyyy', { locale: idLocale })
@@ -425,23 +438,25 @@ export default async function PlayerProfilePage({
               const matchKDA = kda(mp.kills ?? 0, mp.deaths ?? 0, mp.assists ?? 0)
 
               return (
-                <div key={mp.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-slate-800/30 transition-colors group">
-
+                <div
+                  key={mp.id}
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1A1A26] group"
+                  style={{
+                    borderLeft: `3px solid ${isWin ? 'var(--win)' : 'var(--loss)'}`,
+                    borderTop: idx > 0 ? '1px solid var(--border)' : undefined,
+                  }}
+                >
                   {/* Result badge */}
-                  <span className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${
-                    isWin
-                      ? 'bg-green-500/15 text-green-400 border border-green-500/20'
-                      : 'bg-red-500/15 text-red-400 border border-red-500/20'
-                  }`}>
-                    {isWin ? 'W' : 'L'}
+                  <span className={isWin ? 'win-badge shrink-0' : 'loss-badge shrink-0'}>
+                    {isWin ? 'WIN' : 'LOSS'}
                   </span>
 
                   {/* Date */}
-                  <span className="text-sm text-slate-400 w-28 shrink-0 hidden sm:block">{dateStr}</span>
+                  <span className="text-sm w-28 shrink-0 hidden sm:block" style={{ color: 'var(--text-secondary)' }}>{dateStr}</span>
 
                   {/* Hero */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                       {mp.heroes?.name ?? '—'}
                     </p>
                     {mp.heroes?.role && (
@@ -453,10 +468,10 @@ export default async function PlayerProfilePage({
 
                   {/* KDA */}
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {mp.kills}/{mp.deaths}/{mp.assists}
                     </p>
-                    <p className="text-xs text-slate-500">KDA {matchKDA}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>KDA {matchKDA}</p>
                   </div>
 
                   {/* Rating */}
@@ -474,7 +489,8 @@ export default async function PlayerProfilePage({
                   {mp.matches?.id && (
                     <Link
                       href={`/match/${mp.matches.id}`}
-                      className="shrink-0 text-slate-700 hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100"
+                      className="shrink-0 transition-colors opacity-0 group-hover:opacity-100"
+                      style={{ color: 'var(--text-muted)' }}
                       aria-label="Detail match"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />

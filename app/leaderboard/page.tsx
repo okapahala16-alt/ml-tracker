@@ -239,11 +239,20 @@ export default async function LeaderboardPage({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Trophy className="w-5 h-5 text-yellow-400" />
-            <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-          </div>
-          <p className="text-slate-400 text-sm">
+          <p className="section-label mb-1">Hall of Fame</p>
+          <h1
+            className="text-3xl font-black tracking-widest"
+            style={{
+              fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+              background: 'linear-gradient(135deg,#FFD700,#F59E0B)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            LEADERBOARD
+          </h1>
+          <p className="text-sm mt-1.5" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-secondary)' }}>
             {qualifiedCount} player terkualifikasi
             {selectedSeasonId !== 'all' && activeSeason
               ? ` · ${seasons.find((s) => s.id === selectedSeasonId)?.name ?? ''}`

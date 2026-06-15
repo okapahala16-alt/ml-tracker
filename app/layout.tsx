@@ -1,19 +1,29 @@
 import type { Metadata } from 'next'
-import localFont from 'next/font/local'
+import { Orbitron, Rajdhani, Inter } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/layout/Navbar'
 import Sidebar from '@/components/layout/Sidebar'
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  variable: '--font-orbitron',
+  display: 'swap',
 })
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
+
+const rajdhani = Rajdhani({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-rajdhani',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-inter',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -48,8 +58,8 @@ export default async function RootLayout({
 
   return (
     <html lang="id">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-white`}
+      <body className={`${orbitron.variable} ${rajdhani.variable} ${inter.variable} antialiased`}
+        style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
       >
         {isAuthenticated && (
           <Navbar

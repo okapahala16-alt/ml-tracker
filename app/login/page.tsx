@@ -41,63 +41,58 @@ export default function LoginPage() {
     <AuthCard title="Selamat datang kembali" subtitle="Masuk ke akunmu untuk melanjutkan">
       <form onSubmit={handleLogin} className="space-y-5">
 
-        {/* Error banner */}
         {error && (
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: 'var(--loss)' }}>
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Email */}
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+          <label className="block text-sm font-semibold tracking-wide uppercase" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-secondary)' }}>
             Email
           </label>
           <input
-            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors"
+            className="mythic-input w-full px-4 py-3"
           />
         </div>
 
-        {/* Password */}
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+          <label className="block text-sm font-semibold tracking-wide uppercase" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-secondary)' }}>
             Password
           </label>
           <div className="relative">
             <input
-              id="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full px-4 py-3 pr-11 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors"
+              className="mythic-input w-full px-4 py-3 pr-11"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               tabIndex={-1}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: 'var(--text-secondary)' }}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-900/30 transition-all duration-200 flex items-center justify-center gap-2"
+          className="mythic-btn-primary w-full py-3 px-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -109,13 +104,9 @@ export default function LoginPage() {
           )}
         </button>
 
-        {/* Footer link */}
-        <p className="text-center text-sm text-slate-400 pt-1">
+        <p className="text-center text-sm pt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-rajdhani)' }}>
           Belum punya akun?{' '}
-          <Link
-            href="/register"
-            className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-          >
+          <Link href="/register" className="font-semibold transition-colors" style={{ color: 'var(--accent-blue)' }}>
             Daftar sekarang
           </Link>
         </p>
