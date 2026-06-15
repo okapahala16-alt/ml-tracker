@@ -33,7 +33,7 @@ type MPRow = {
   heroes: { id: string; name: string; role: string } | null
 }
 
-type Profile = { id: string; username: string; display_name: string | null; is_admin: boolean }
+type Profile = { id: string; username: string; display_name: string | null; is_admin: boolean; color: string }
 
 type RecentRow = {
   id:         string
@@ -123,7 +123,7 @@ export default async function DashboardPage({
     // All profiles for player cards (max 10)
     supabase
       .from('profiles')
-      .select('id, username, display_name, is_admin')
+      .select('id, username, display_name, is_admin, color')
       .order('username')
       .limit(10),
   ])
@@ -387,7 +387,7 @@ export default async function DashboardPage({
 
                     {/* Avatar + name */}
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-base font-black text-white shrink-0">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-black text-white shrink-0" style={{ backgroundColor: profile.color ?? '#6366f1' }}>
                         {initial}
                       </div>
                       <div className="min-w-0">
@@ -488,7 +488,7 @@ export default async function DashboardPage({
 
                       {/* Creator info */}
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: creator?.color ?? '#6366f1' }}>
                           {creatorInitial}
                         </div>
                         <div className="min-w-0">
