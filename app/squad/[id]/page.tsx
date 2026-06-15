@@ -5,6 +5,7 @@ import { ChevronLeft, Upload, Users, Copy, TrendingUp, TrendingDown } from 'luci
 import type { Metadata } from 'next'
 import SquadAnalytics from './SquadAnalytics'
 import CopyButton from './CopyButton'
+import DeleteSquadButton from './DeleteSquadButton'
 
 export const metadata: Metadata = { title: 'Squad Detail' }
 
@@ -82,10 +83,13 @@ export default async function SquadDetailPage({ params }: { params: { id: string
 
   return (
     <div className="p-5 lg:p-8 max-w-4xl mx-auto">
-      {/* Back */}
-      <Link href="/squad" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors mb-6">
-        <ChevronLeft className="w-4 h-4" /> Squad
-      </Link>
+      {/* Back + Delete */}
+      <div className="flex items-center justify-between mb-6">
+        <Link href="/squad" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
+          <ChevronLeft className="w-4 h-4" /> Squad
+        </Link>
+        {isOwner && <DeleteSquadButton squadId={params.id} />}
+      </div>
 
       {/* Header */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6">
