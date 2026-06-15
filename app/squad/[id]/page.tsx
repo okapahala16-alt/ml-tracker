@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import SquadAnalytics from './SquadAnalytics'
 import CopyButton from './CopyButton'
 import DeleteSquadButton from './DeleteSquadButton'
+import ClaimNameSection from './ClaimNameSection'
 
 export const metadata: Metadata = { title: 'Squad Detail' }
 
@@ -79,6 +80,16 @@ export default async function SquadDetailPage({ params }: { params: { id: string
     }>
   }>
 
+  // Fetch current user's name mapping in this squad
+  const { data: myMappingRow } = await supabase
+    .from('squad_name_mappings')
+    .select('in_game_name')
+    .eq('squad_session_id', params.id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const myMapping = myMappingRow?.in_game_name ?? null
+
   const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mltracker-app.vercel.app'}/squad/join?code=${session.invite_code}`
 
   return (
@@ -149,6 +160,13 @@ export default async function SquadDetailPage({ params }: { params: { id: string
           ))}
         </div>
       </div>
+
+      {/* Claim name */}
+      {matchList.length > 0 && (
+        <div className="mb-4">
+          <ClaimNameSection squadId={params.id} userId={user.id} myMapping={myMapping} />
+        </div>
+      )}
 
       {/* Analytics */}
       {matchList.length > 0 && (
