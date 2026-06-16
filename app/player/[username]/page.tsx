@@ -30,20 +30,60 @@ type MPRow = {
 // ── Helpers ───────────────────────────────────────────────────
 
 function getRank(wr: number) {
-  if (wr < 40) return { label: 'Feeder',  text: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/25',    bar: 'bg-red-500'    }
-  if (wr < 50) return { label: 'Average', text: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/25', bar: 'bg-yellow-500' }
-  if (wr < 60) return { label: 'Good',    text: 'text-green-400',  bg: 'bg-green-500/10',  border: 'border-green-500/25',  bar: 'bg-green-500'  }
-  return               { label: 'Carry',  text: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/25',   bar: 'bg-gradient-to-r from-blue-500 to-purple-500' }
+  if (wr < 40) return {
+    label: 'Feeder',  text: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/25',    bar: 'bg-red-500',
+    pillBg: 'rgba(239,68,68,0.18)',   pillColor: 'var(--loss)',         pillBorder: '1px solid rgba(239,68,68,0.5)',
+  }
+  if (wr < 50) return {
+    label: 'Average', text: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/25', bar: 'bg-yellow-500',
+    pillBg: 'rgba(234,179,8,0.18)',   pillColor: '#EAB308',            pillBorder: '1px solid rgba(234,179,8,0.5)',
+  }
+  if (wr < 60) return {
+    label: 'Good',    text: 'text-green-400',  bg: 'bg-green-500/10',  border: 'border-green-500/25',  bar: 'bg-green-500',
+    pillBg: 'rgba(34,197,94,0.18)',   pillColor: 'var(--win)',          pillBorder: '1px solid rgba(34,197,94,0.5)',
+  }
+  return {
+    label: 'Carry',   text: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/25',   bar: 'bg-gradient-to-r from-blue-500 to-purple-500',
+    pillBg: 'rgba(79,142,247,0.18)',  pillColor: 'var(--accent-blue)', pillBorder: '1px solid rgba(79,142,247,0.5)', pillShadow: '0 0 12px rgba(79,142,247,0.2)',
+  }
 }
 
-const ROLE_COLOR: Record<string, string> = {
-  tank:     'text-blue-400',
-  fighter:  'text-orange-400',
-  mage:     'text-purple-400',
-  marksman: 'text-yellow-400',
-  assassin: 'text-red-400',
-  support:  'text-green-400',
+const ROLE_BANNER: Record<string, { bg: string; borderColor: string; roleColor: string }> = {
+  tank:     { bg: 'linear-gradient(135deg, rgba(79,142,247,0.15), rgba(79,142,247,0.05))',  borderColor: 'rgba(79,142,247,0.25)',  roleColor: 'var(--accent-blue)'   },
+  fighter:  { bg: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(249,115,22,0.05))', borderColor: 'rgba(249,115,22,0.25)',  roleColor: '#F97316'              },
+  mage:     { bg: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(124,58,237,0.05))', borderColor: 'rgba(124,58,237,0.25)',  roleColor: 'var(--accent-purple)' },
+  marksman: { bg: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05))',   borderColor: 'rgba(34,197,94,0.25)',   roleColor: 'var(--win)'           },
+  assassin: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05))',   borderColor: 'rgba(239,68,68,0.25)',   roleColor: 'var(--loss)'          },
+  support:  { bg: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05))',   borderColor: 'rgba(255,215,0,0.25)',   roleColor: 'var(--mvp-gold)'      },
 }
+const DEFAULT_BANNER = {
+  bg: 'linear-gradient(135deg, rgba(79,142,247,0.1), rgba(124,58,237,0.1))',
+  borderColor: 'rgba(79,142,247,0.2)',
+  roleColor: 'var(--accent-blue)',
+}
+
+const ROLE_BADGE: Record<string, { background: string; color: string; border: string }> = {
+  tank:     { background: 'rgba(79,142,247,0.15)',  color: 'var(--accent-blue)',   border: '1px solid rgba(79,142,247,0.3)'  },
+  fighter:  { background: 'rgba(249,115,22,0.15)',  color: '#F97316',              border: '1px solid rgba(249,115,22,0.3)'  },
+  mage:     { background: 'rgba(124,58,237,0.15)',  color: 'var(--accent-purple)', border: '1px solid rgba(124,58,237,0.3)'  },
+  marksman: { background: 'rgba(34,197,94,0.15)',   color: 'var(--win)',           border: '1px solid rgba(34,197,94,0.3)'   },
+  assassin: { background: 'rgba(239,68,68,0.15)',   color: 'var(--loss)',          border: '1px solid rgba(239,68,68,0.3)'   },
+  support:  { background: 'rgba(255,215,0,0.15)',   color: 'var(--mvp-gold)',      border: '1px solid rgba(255,215,0,0.3)'   },
+}
+
+function RoleBadge({ role }: { role: string }) {
+  const s = ROLE_BADGE[role] ?? {
+    background: 'rgba(100,116,139,0.15)',
+    color:      'var(--text-secondary)',
+    border:     '1px solid rgba(100,116,139,0.3)',
+  }
+  return (
+    <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize" style={s}>
+      {role}
+    </span>
+  )
+}
+
 
 function kda(kills: number, deaths: number, assists: number) {
   return deaths > 0 ? ((kills + assists) / deaths).toFixed(2) : `${kills + assists}.00`
@@ -205,9 +245,11 @@ export default async function PlayerProfilePage({
       assists: mp.assists ?? 0,
     }))
 
-  const recentRows  = rows.slice(0, 10)
+  const recentRows   = rows.slice(0, 10)
   const isOwnProfile = user.id === profile.id
   const initial      = (profile.display_name || profile.username)[0]?.toUpperCase() ?? '?'
+  const topHeroRole  = heroStats[0]?.role ?? ''
+  const banner       = ROLE_BANNER[topHeroRole] ?? DEFAULT_BANNER
 
   // ── Render ────────────────────────────────────────────────
 
@@ -215,34 +257,57 @@ export default async function PlayerProfilePage({
     <div className="p-5 lg:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* ── SECTION 1: Header ── */}
-      <div className="gradient-border rounded-2xl p-6" style={{ background: 'var(--bg-card)' }}>
+      <div
+        className="rounded-2xl p-6"
+        style={{ background: banner.bg, border: `1px solid ${banner.borderColor}` }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
 
           {/* Avatar + names */}
           <div className="flex items-center gap-4">
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 blur-xl rounded-full" style={{ background: 'rgba(79,142,247,0.3)' }} />
-              <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg" style={{ background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)' }}>
-                {initial}
-              </div>
+            {/* Avatar */}
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shrink-0"
+              style={{
+                background:  'rgba(0,0,0,0.25)',
+                border:      `2px solid ${banner.borderColor}`,
+                color:       banner.roleColor,
+                fontFamily:  'var(--font-orbitron), Orbitron, sans-serif',
+                boxShadow:   `0 0 20px ${banner.borderColor}`,
+              }}
+            >
+              {initial}
             </div>
+
             <div>
               <h1
                 className="text-2xl font-black tracking-wide"
                 style={{
-                  fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
-                  background: 'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+                  fontFamily:          'var(--font-orbitron), Orbitron, sans-serif',
+                  background:          'linear-gradient(135deg,#4F8EF7,#7C3AED)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  backgroundClip:      'text',
                 }}
               >
                 {(profile.display_name || profile.username).toUpperCase()}
               </h1>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-rajdhani)' }}>@{profile.username}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${rank.bg} ${rank.text} ${rank.border}`} style={{ fontFamily: 'var(--font-rajdhani)' }}>
-                  {rank.label}
+              <p className="text-sm" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-rajdhani)' }}>
+                @{profile.username}
+              </p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                  style={{
+                    fontFamily: 'var(--font-rajdhani)',
+                    letterSpacing: '0.06em',
+                    background:   rank.pillBg,
+                    color:        rank.pillColor,
+                    border:       rank.pillBorder,
+                    boxShadow:    (rank as { pillShadow?: string }).pillShadow,
+                  }}
+                >
+                  {rank.label.toUpperCase()}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{total} match</span>
               </div>
@@ -293,7 +358,18 @@ export default async function PlayerProfilePage({
           {/* KDA Ratio */}
           <div className="card rounded-2xl p-5">
             <p className="section-label mb-1">KDA Ratio</p>
-            <p className="stat-number">{kdaRatio}</p>
+            <p
+              className="text-3xl font-black tracking-tight"
+              style={{
+                fontFamily:          'var(--font-orbitron), Orbitron, sans-serif',
+                background:          'linear-gradient(135deg,#4F8EF7,#7C3AED)',
+                WebkitBackgroundClip:'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip:      'text',
+              }}
+            >
+              {kdaRatio}
+            </p>
             <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>(K+A) / D</p>
           </div>
 
@@ -372,7 +448,7 @@ export default async function PlayerProfilePage({
                     <div>
                       <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{hero.name}</span>
                       {isBest && <span className="ml-2 text-[10px] font-semibold" style={{ color: 'var(--accent-blue)' }}>BEST</span>}
-                      <p className={`text-xs capitalize mt-0.5 ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>{hero.role}</p>
+                      <div className="mt-1"><RoleBadge role={hero.role} /></div>
                     </div>
                     <div className="text-right text-sm">
                       <p style={{ color: 'var(--text-primary)' }}>{hero.games}G · {hero.wins}W · {hero.losses}L</p>
@@ -394,7 +470,7 @@ export default async function PlayerProfilePage({
                           BEST
                         </span>
                       )}
-                      <p className={`text-xs capitalize mt-0.5 ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>{hero.role}</p>
+                      <div className="mt-1"><RoleBadge role={hero.role} /></div>
                     </div>
                     <div className="text-center text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{hero.games}</div>
                     <div className="text-center text-sm font-medium" style={{ color: 'var(--win)' }}>{hero.wins}</div>
@@ -460,9 +536,9 @@ export default async function PlayerProfilePage({
                       {mp.heroes?.name ?? '—'}
                     </p>
                     {mp.heroes?.role && (
-                      <p className={`text-xs capitalize ${ROLE_COLOR[mp.heroes.role] ?? 'text-slate-500'}`}>
-                        {mp.heroes.role}
-                      </p>
+                      <div className="mt-0.5">
+                        <RoleBadge role={mp.heroes.role} />
+                      </div>
                     )}
                   </div>
 

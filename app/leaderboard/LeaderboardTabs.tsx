@@ -8,18 +8,18 @@ import Link from 'next/link'
 export const MIN_GAMES = 5
 
 export type PlayerEntry = {
-  userId:       string
-  username:     string
-  displayName:  string
-  games:        number
-  wins:         number
-  wr:           number   // 0–100
-  kda:          number
-  avgRating:    number   // 0–10, 0 = no ratings
-  avgDeaths:    number
-  uniqueHeroes: number
-  topHero:      string
-  maxWinStreak: number
+  userId:        string
+  username:      string
+  displayName:   string
+  games:         number
+  wins:          number
+  wr:            number
+  kda:           number
+  avgRating:     number
+  avgDeaths:     number
+  uniqueHeroes:  number
+  topHero:       string
+  maxWinStreak:  number
   maxLoseStreak: number
 }
 
@@ -38,66 +38,136 @@ export type HeroEntry = {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function initial(name: string) {
-  return name[0]?.toUpperCase() ?? '?'
+  const parts = name.trim().split(' ')
+  return parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : (name[0]?.toUpperCase() ?? '?')
 }
 
-function wrColor(wr: number) {
-  if (wr < 40) return 'text-red-400'
-  if (wr < 50) return 'text-yellow-400'
-  if (wr < 60) return 'text-green-400'
-  return 'text-blue-400'
+// ── Role badge ────────────────────────────────────────────────────────────────
+
+const ROLE_BADGE: Record<string, { background: string; color: string; border: string }> = {
+  tank:     { background: 'rgba(79,142,247,0.15)',  color: 'var(--accent-blue)',   border: '1px solid rgba(79,142,247,0.3)'  },
+  fighter:  { background: 'rgba(249,115,22,0.15)',  color: '#F97316',              border: '1px solid rgba(249,115,22,0.3)'  },
+  mage:     { background: 'rgba(124,58,237,0.15)',  color: 'var(--accent-purple)', border: '1px solid rgba(124,58,237,0.3)'  },
+  marksman: { background: 'rgba(34,197,94,0.15)',   color: 'var(--win)',           border: '1px solid rgba(34,197,94,0.3)'   },
+  assassin: { background: 'rgba(239,68,68,0.15)',   color: 'var(--loss)',          border: '1px solid rgba(239,68,68,0.3)'   },
+  support:  { background: 'rgba(255,215,0,0.15)',   color: 'var(--mvp-gold)',      border: '1px solid rgba(255,215,0,0.3)'   },
 }
 
-const ROLE_COLOR: Record<string, string> = {
-  tank:     'text-blue-400',
-  fighter:  'text-orange-400',
-  mage:     'text-purple-400',
-  marksman: 'text-yellow-400',
-  assassin: 'text-red-400',
-  support:  'text-green-400',
+function RoleBadge({ role }: { role: string }) {
+  const s = ROLE_BADGE[role] ?? {
+    background: 'rgba(100,116,139,0.15)',
+    color:      'var(--text-secondary)',
+    border:     '1px solid rgba(100,116,139,0.3)',
+  }
+  return (
+    <span
+      className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+      style={s}
+    >
+      {role}
+    </span>
+  )
 }
 
 // ── Podium ───────────────────────────────────────────────────────────────────
 
 type RankedEntry = { player: PlayerEntry; value: number }
 
-function Podium({ entries, formatValue }: { entries: RankedEntry[]; formatValue: (v: number) => string }) {
-  const p1 = entries[0]
-  const p2 = entries[1]
-  const p3 = entries[2] ?? null
+const PODIUM_CFG: Record<1|2|3, {
+  avatarBg: string; avatarBorder: string; avatarColor: string; avatarShadow?: string
+  barBorder: string; numColor: string; barHeight: string
+}> = {
+  1: {
+    avatarBg:     'rgba(255,215,0,0.15)',
+    avatarBorder: '1.5px solid var(--mvp-gold)',
+    avatarColor:  'var(--mvp-gold)',
+    avatarShadow: '0 0 12px rgba(255,215,0,0.35)',
+    barBorder:    '1px solid rgba(255,215,0,0.4)',
+    numColor:     'var(--mvp-gold)',
+    barHeight:    '90px',
+  },
+  2: {
+    avatarBg:     'rgba(148,163,184,0.15)',
+    avatarBorder: '1.5px solid var(--silver)',
+    avatarColor:  'var(--silver)',
+    barBorder:    '1px solid var(--border)',
+    numColor:     'var(--silver)',
+    barHeight:    '64px',
+  },
+  3: {
+    avatarBg:     'rgba(205,127,50,0.15)',
+    avatarBorder: '1.5px solid var(--bronze)',
+    avatarColor:  'var(--bronze)',
+    barBorder:    '1px solid var(--border)',
+    numColor:     'var(--bronze)',
+    barHeight:    '48px',
+  },
+}
 
-  const SLOTS = [
-    p2 ? { data: p2, rank: 2, barH: 'h-20', medal: '🥈',
-      ring: 'ring-slate-400/40', grad: 'from-slate-400 to-slate-600', val: 'text-slate-300' } : null,
-    p1 ? { data: p1, rank: 1, barH: 'h-28', medal: '🥇',
-      ring: 'ring-yellow-400/50', grad: 'from-yellow-400 to-amber-600', val: 'text-yellow-400' } : null,
-    p3 ? { data: p3, rank: 3, barH: 'h-14', medal: '🥉',
-      ring: 'ring-amber-600/40', grad: 'from-amber-700 to-orange-800', val: 'text-amber-500' } : null,
+function Podium({
+  entries,
+  formatValue,
+}: {
+  entries: RankedEntry[]
+  formatValue: (v: number) => string
+}) {
+  const slots: ({ data: RankedEntry; rank: 1|2|3 } | null)[] = [
+    entries[1] ? { data: entries[1], rank: 2 } : null,
+    entries[0] ? { data: entries[0], rank: 1 } : null,
+    entries[2] ? { data: entries[2], rank: 3 } : null,
   ]
 
-  const barStyles: Record<number, { background: string; border: string }> = {
-    1: { background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.2)' },
-    2: { background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)' },
-    3: { background: 'rgba(205,127,50,0.08)', border: '1px solid rgba(205,127,50,0.15)' },
-  }
-
   return (
-    <div className="flex items-end justify-center gap-2 sm:gap-5 pt-5 pb-6">
-      {SLOTS.map((slot, i) => {
-        if (!slot) return <div key={i} className="w-20 sm:w-24" />
-        const { data, rank, barH, medal, ring, grad, val } = slot
+    <div className="flex items-end justify-center gap-4 py-5">
+      {slots.map((slot, i) => {
+        if (!slot) return <div key={i} style={{ width: 80 }} />
+        const { data, rank } = slot
+        const cfg = PODIUM_CFG[rank]
         return (
-          <Link key={rank} href={`/player/${data.player.username}`} className="flex flex-col items-center gap-1.5 group">
-            <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${grad} ring-2 ${ring} flex items-center justify-center text-base font-black text-white group-hover:scale-110 transition-transform shadow-lg shrink-0`}>
+          <Link
+            key={rank}
+            href={`/player/${data.player.username}`}
+            className="flex flex-col items-center gap-1 group"
+          >
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 group-hover:scale-110 transition-transform"
+              style={{
+                background: cfg.avatarBg,
+                border:     cfg.avatarBorder,
+                color:      cfg.avatarColor,
+                boxShadow:  cfg.avatarShadow,
+              }}
+            >
               {initial(data.player.displayName)}
             </div>
-            <div className="text-center max-w-[80px]">
-              <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-inter)' }}>{data.player.displayName}</p>
-              <p className={`text-sm font-black ${val}`} style={{ fontFamily: 'var(--font-orbitron)' }}>{formatValue(data.value)}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{data.player.games}g</p>
-            </div>
-            <div className={`w-20 sm:w-24 ${barH} rounded-t-xl flex items-center justify-center`} style={barStyles[rank]}>
-              <span className="text-xl">{medal}</span>
+            <p
+              className="text-center truncate"
+              style={{
+                maxWidth:   76,
+                fontSize:   13,
+                fontWeight: 500,
+                fontFamily: 'var(--font-rajdhani)',
+                color:      'var(--text-primary)',
+              }}
+            >
+              {data.player.displayName}
+            </p>
+            <p className="text-center" style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              {formatValue(data.value)}
+            </p>
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width:        80,
+                height:       cfg.barHeight,
+                background:   'rgba(255,255,255,0.02)',
+                border:       cfg.barBorder,
+                borderRadius: '8px 8px 0 0',
+              }}
+            >
+              <span style={{ color: cfg.numColor, fontWeight: 700, fontSize: 18 }}>{rank}</span>
             </div>
           </Link>
         )
@@ -106,37 +176,85 @@ function Podium({ entries, formatValue }: { entries: RankedEntry[]; formatValue:
   )
 }
 
-// ── Ranked list ───────────────────────────────────────────────────────────────
+// ── Full ranking table ────────────────────────────────────────────────────────
 
-function RankList({
+function FullRankingTable({
   entries,
   formatValue,
-  startRank = 1,
 }: {
   entries: RankedEntry[]
   formatValue: (v: number) => string
-  startRank?: number
 }) {
   if (entries.length === 0) return null
+  const rankColors: Record<number, string> = {
+    1: 'var(--mvp-gold)',
+    2: 'var(--silver)',
+    3: 'var(--bronze)',
+  }
+
   return (
-    <div className="space-y-0.5">
+    <div
+      style={{
+        background:   'var(--bg-card)',
+        border:       '1px solid var(--border)',
+        borderRadius: 12,
+        overflow:     'hidden',
+      }}
+    >
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns: '36px 1fr 110px 64px',
+          padding:             '10px 16px',
+          background:          'rgba(255,255,255,0.025)',
+          borderBottom:        '1px solid var(--border)',
+        }}
+      >
+        {['#', 'PLAYER', 'VALUE', 'GAMES'].map((h) => (
+          <span key={h} className="section-label">{h}</span>
+        ))}
+      </div>
+
       {entries.map(({ player, value }, idx) => {
-        const rank = startRank + idx
+        const rank     = idx + 1
+        const numColor = rankColors[rank]
         return (
           <Link
             key={player.userId}
             href={`/player/${player.username}`}
-            className="flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors hover:bg-[#1A1A26] group"
+            className="grid items-center transition-colors hover:bg-[#1A1A26]"
+            style={{
+              gridTemplateColumns: '36px 1fr 110px 64px',
+              padding:             '10px 16px',
+              borderTop:           '1px solid var(--border)',
+            }}
           >
-            <span className="w-5 text-xs font-bold text-right shrink-0" style={{ color: 'var(--text-muted)' }}>{rank}</span>
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-[11px] font-black text-white shrink-0 group-hover:scale-105 transition-transform">
-              {initial(player.displayName)}
+            <span
+              style={{
+                color:      numColor ?? 'var(--text-secondary)',
+                fontWeight: numColor ? 700 : 400,
+                fontSize:   13,
+              }}
+            >
+              {rank}
+            </span>
+            <div className="min-w-0">
+              <p
+                className="truncate text-sm"
+                style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-rajdhani)', fontWeight: 500 }}
+              >
+                {player.displayName}
+              </p>
+              <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                @{player.username}
+              </p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{player.displayName}</p>
-              <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>@{player.username} · {player.games} games</p>
-            </div>
-            <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{formatValue(value)}</span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--accent-blue)' }}>
+              {formatValue(value)}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              {player.games}g
+            </span>
           </Link>
         )
       })}
@@ -154,70 +272,113 @@ function BestCategory({
   entries: RankedEntry[]
   formatValue: (v: number) => string
 }) {
-  const top3 = entries.slice(0, 3)
-  const rest  = entries.slice(3)
-
   return (
-    <div className="card rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
-        <span className="text-base">{emoji}</span>
-        <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>{title}</h3>
-        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{entries.length} player</span>
+    <div
+      style={{
+        background:   'var(--bg-card)',
+        border:       '1px solid var(--border)',
+        borderRadius: 16,
+        overflow:     'hidden',
+      }}
+    >
+      <div
+        className="flex items-center gap-2 px-5 py-3.5"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <span className="text-lg">{emoji}</span>
+        <h3
+          className="text-sm font-semibold"
+          style={{
+            fontFamily:    'var(--font-rajdhani)',
+            color:         'var(--text-primary)',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {title}
+        </h3>
+        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          {entries.length} player
+        </span>
       </div>
 
       {entries.length === 0 ? (
-        <div className="py-8 text-center text-xs italic" style={{ color: 'var(--text-muted)' }}>
+        <div className="py-10 text-center text-xs italic" style={{ color: 'var(--text-muted)' }}>
           Belum ada player dengan min. {MIN_GAMES} games.
         </div>
       ) : (
-        <div className="px-3 pb-3">
-          {top3.length >= 2
-            ? <Podium entries={top3} formatValue={formatValue} />
-            : <div className="pt-3"><RankList entries={top3} formatValue={formatValue} /></div>
-          }
-          {rest.length > 0 && (
-            <>
-              <div className="my-1 mx-1" style={{ borderTop: '1px solid var(--border)' }} />
-              <RankList entries={rest} formatValue={formatValue} startRank={4} />
-            </>
+        <div className="px-4 pb-4">
+          {entries.length >= 2 && (
+            <Podium entries={entries.slice(0, 3)} formatValue={formatValue} />
           )}
+          <FullRankingTable entries={entries} formatValue={formatValue} />
         </div>
       )}
     </div>
   )
 }
 
-// ── Worst category card ───────────────────────────────────────────────────────
+// ── Worst award card ──────────────────────────────────────────────────────────
 
-function WorstCategory({
-  emoji, title, note, entries, formatValue,
+function WorstCard({
+  emoji, title, note, entry, formatValue,
 }: {
-  emoji: string
-  title: string
-  note?: string
-  entries: RankedEntry[]
+  emoji:       string
+  title:       string
+  note?:       string
+  entry?:      RankedEntry
   formatValue: (v: number) => string
 }) {
   return (
-    <div className="card rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
-        <span className="text-base">{emoji}</span>
+    <div
+      style={{
+        background:   'var(--bg-card)',
+        border:       '1px solid var(--border)',
+        borderRadius: 12,
+        padding:      '20px',
+      }}
+    >
+      <div className="flex items-start gap-3 mb-4">
+        <span style={{ fontSize: 28, lineHeight: 1 }}>{emoji}</span>
         <div>
-          <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>{title}</h3>
-          {note && <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{note}</p>}
-        </div>
-        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{entries.length} player</span>
-      </div>
-
-      <div className="px-3 py-3">
-        {entries.length === 0 ? (
-          <p className="text-xs italic py-3 text-center" style={{ color: 'var(--text-muted)' }}>
-            Belum ada data cukup.
+          <p
+            className="font-semibold text-xs uppercase"
+            style={{
+              fontFamily:    'var(--font-rajdhani)',
+              color:         'var(--text-secondary)',
+              letterSpacing: '0.08em',
+            }}
+          >
+            {title}
           </p>
-        ) : (
-          <RankList entries={entries} formatValue={formatValue} />
-        )}
+          {note && (
+            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {note}
+            </p>
+          )}
+        </div>
       </div>
+      {entry ? (
+        <Link href={`/player/${entry.player.username}`}>
+          <p
+            className="font-bold mb-1 hover:opacity-80 transition-opacity truncate"
+            style={{
+              fontFamily: 'var(--font-orbitron), Orbitron, sans-serif',
+              fontSize:   18,
+              color:      'var(--loss)',
+            }}
+          >
+            {entry.player.displayName}
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            {formatValue(entry.value)}
+          </p>
+        </Link>
+      ) : (
+        <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>
+          Belum ada data cukup.
+        </p>
+      )}
     </div>
   )
 }
@@ -245,26 +406,52 @@ function HeroTable({ heroes }: { heroes: HeroEntry[] }) {
     return (
       <button
         onClick={() => toggleSort(k)}
-        className="flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors hover:opacity-100"
+        className="flex items-center gap-0.5 transition-opacity hover:opacity-100"
         style={{
-          fontFamily: 'var(--font-rajdhani)',
-          color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          opacity: active ? 1 : 0.8,
+          fontFamily:    'var(--font-rajdhani)',
+          fontSize:      10,
+          fontWeight:    600,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color:         active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+          opacity:       active ? 1 : 0.8,
         }}
       >
         {label}
-        {active && <span className="text-[8px] ml-0.5">{asc ? '▲' : '▼'}</span>}
+        {active && <span style={{ fontSize: 8, marginLeft: 2 }}>{asc ? '▲' : '▼'}</span>}
       </button>
     )
   }
 
-  const COLS = 'minmax(0,1.4fr) minmax(0,0.7fr) 4.5rem 4.5rem 4.5rem 4.5rem minmax(0,1fr)'
+  const COLS = 'minmax(0,1.4fr) 90px 4.5rem 4.5rem 4.5rem 4.5rem minmax(0,1fr)'
 
   return (
-    <div className="card rounded-2xl overflow-hidden">
-      <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
-        <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-rajdhani)', color: 'var(--text-primary)' }}>Hero Stats</h3>
-        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>{heroes.length} hero dipakai</span>
+    <div
+      style={{
+        background:   'var(--bg-card)',
+        border:       '1px solid var(--border)',
+        borderRadius: 16,
+        overflow:     'hidden',
+      }}
+    >
+      <div
+        className="flex items-center gap-2 px-5 py-3.5"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <h3
+          className="font-semibold text-sm"
+          style={{
+            fontFamily:    'var(--font-rajdhani)',
+            color:         'var(--text-primary)',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Hero Stats
+        </h3>
+        <span className="ml-auto text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          {heroes.length} hero dipakai
+        </span>
       </div>
 
       {heroes.length === 0 ? (
@@ -274,48 +461,76 @@ function HeroTable({ heroes }: { heroes: HeroEntry[] }) {
       ) : (
         <div className="overflow-x-auto">
           <div className="min-w-[640px]">
-            {/* Header */}
-            <div className="grid gap-3 px-5 py-3" style={{ gridTemplateColumns: COLS, background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
-              <div className="section-label">Hero</div>
-              <div className="section-label">Role</div>
-              <ColHeader k="games"     label="Games" />
-              <ColHeader k="wr"        label="WR%" />
-              <ColHeader k="kda"       label="KDA" />
+            <div
+              className="grid gap-3 px-5 py-3"
+              style={{
+                gridTemplateColumns: COLS,
+                background:          'rgba(255,255,255,0.02)',
+                borderBottom:        '1px solid var(--border)',
+              }}
+            >
+              <span className="section-label">Hero</span>
+              <span className="section-label">Role</span>
+              <ColHeader k="games"     label="Games"  />
+              <ColHeader k="wr"        label="WR%"    />
+              <ColHeader k="kda"       label="KDA"    />
               <ColHeader k="avgRating" label="Rating" />
-              <div className="section-label">Most Used By</div>
+              <span className="section-label">Most Used By</span>
             </div>
 
-            {/* Rows */}
             <div>
               {sorted.map((hero, idx) => (
                 <div
                   key={hero.id}
                   className="grid gap-3 px-5 py-3.5 items-center transition-colors hover:bg-[#1A1A26]"
-                  style={{ gridTemplateColumns: COLS, borderTop: idx > 0 ? '1px solid var(--border)' : undefined }}
+                  style={{
+                    gridTemplateColumns: COLS,
+                    borderTop:           idx > 0 ? '1px solid var(--border)' : undefined,
+                  }}
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    {idx === 0 && <span className="text-xs shrink-0">🥇</span>}
-                    {idx === 1 && <span className="text-xs shrink-0">🥈</span>}
-                    {idx === 2 && <span className="text-xs shrink-0">🥉</span>}
-                    {idx > 2   && <span className="text-[10px] w-3 shrink-0" style={{ color: 'var(--text-muted)' }}>{idx + 1}</span>}
-                    <span className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{hero.name}</span>
+                    {idx < 3 ? (
+                      <span className="text-xs shrink-0">
+                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] w-3 shrink-0" style={{ color: 'var(--text-muted)' }}>
+                        {idx + 1}
+                      </span>
+                    )}
+                    <span className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                      {hero.name}
+                    </span>
                   </div>
-                  <div className={`text-xs capitalize ${ROLE_COLOR[hero.role] ?? 'text-slate-400'}`}>
-                    {hero.role}
+
+                  <div>
+                    <RoleBadge role={hero.role} />
                   </div>
-                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{hero.games}</div>
+
+                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {hero.games}
+                  </div>
                   <div className={`text-sm font-semibold ${hero.wr >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                     {hero.wr.toFixed(0)}%
                   </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{hero.kda.toFixed(2)}</div>
                   <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    {hero.avgRating > 0 ? hero.avgRating.toFixed(1) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                    {hero.kda.toFixed(2)}
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {hero.avgRating > 0 ? (
+                      hero.avgRating.toFixed(1)
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>—</span>
+                    )}
                   </div>
                   <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
-                    {hero.mostUsedBy
-                      ? <Link href={`/player/${hero.mostUsedBy}`} className="transition-colors hover:text-blue-400">@{hero.mostUsedBy}</Link>
-                      : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                    }
+                    {hero.mostUsedBy ? (
+                      <Link href={`/player/${hero.mostUsedBy}`} className="transition-colors hover:text-blue-400">
+                        @{hero.mostUsedBy}
+                      </Link>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>—</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -400,25 +615,32 @@ export default function LeaderboardTabs({ players, heroes }: Props) {
 
   return (
     <div>
-      {/* Tab strip */}
+      {/* Pill tab strip */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t.key ? 'gradient-border' : 'card'}`}
+            className="flex items-center gap-1.5 px-5 py-2 font-semibold transition-all"
             style={{
-              fontFamily: 'var(--font-rajdhani)',
-              color: tab === t.key ? 'var(--accent-blue)' : 'var(--text-secondary)',
+              borderRadius:  999,
+              fontFamily:    'var(--font-rajdhani)',
+              fontWeight:    600,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              fontSize:      13,
+              background:    tab === t.key
+                ? 'linear-gradient(135deg, #4F8EF7, #7C3AED)'
+                : 'transparent',
+              color:  tab === t.key ? '#fff' : 'var(--text-secondary)',
+              border: tab === t.key ? '1px solid transparent' : '1px solid var(--border)',
             }}
           >
-            {t.emoji}
+            <span>{t.emoji}</span>
             <span>{t.label}</span>
           </button>
         ))}
       </div>
-
-      {/* Content — each conditional section mounts fresh on tab switch, triggering the CSS animation */}
 
       {tab === 'best' && (
         <div className="space-y-5" style={{ animation: 'tabFadeIn 0.18s ease-out both' }}>
@@ -436,18 +658,21 @@ export default function LeaderboardTabs({ players, heroes }: Props) {
       )}
 
       {tab === 'worst' && (
-        <div className="space-y-5" style={{ animation: 'tabFadeIn 0.18s ease-out both' }}>
-          <WorstCategory emoji="💀" title="Most Deaths Per Game"
-            entries={byAvgDeaths}    formatValue={(v) => `${v.toFixed(1)} avg`} />
-          <WorstCategory emoji="😬" title="Longest Lose Streak"
-            entries={byLoseStreak}   formatValue={(v) => `${v} beruntun`} />
-          <WorstCategory emoji="🧊" title="Lowest Avg Rating"
-            entries={byLowestRating} formatValue={(v) => v.toFixed(1)} />
-          <WorstCategory emoji="🎭" title="One-Trick Pony"
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          style={{ animation: 'tabFadeIn 0.18s ease-out both' }}
+        >
+          <WorstCard emoji="💀" title="Most Deaths Per Game"
+            entry={byAvgDeaths[0]}    formatValue={(v) => `${v.toFixed(1)} avg`} />
+          <WorstCard emoji="😬" title="Longest Lose Streak"
+            entry={byLoseStreak[0]}   formatValue={(v) => `${v}x beruntun`} />
+          <WorstCard emoji="🧊" title="Lowest Avg Rating"
+            entry={byLowestRating[0]} formatValue={(v) => v.toFixed(1)} />
+          <WorstCard emoji="🎭" title="One-Trick Pony"
             note="Min 5 games, < 3 hero berbeda"
-            entries={byOneTrick}     formatValue={(v) => `${v} hero saja`} />
-          <WorstCategory emoji="🐢" title="Lowest Win Rate"
-            entries={byLowestWR}     formatValue={(v) => `${v.toFixed(1)}%`} />
+            entry={byOneTrick[0]}     formatValue={(v) => `${v} hero saja`} />
+          <WorstCard emoji="🐢" title="Lowest Win Rate"
+            entry={byLowestWR[0]}     formatValue={(v) => `${v.toFixed(1)}%`} />
         </div>
       )}
 
