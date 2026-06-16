@@ -12,7 +12,7 @@ export default async function JoinSquadPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const code = (searchParams.code ?? '').toUpperCase().trim()
+  const code = (searchParams.code ?? '').toLowerCase().trim()
   if (!code) redirect('/squad')
 
   // Look up the squad session by invite code.
@@ -43,7 +43,7 @@ export default async function JoinSquadPage({
             KODE TIDAK VALID
           </h2>
           <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
-            Squad dengan kode <span className="font-mono font-bold" style={{ color: 'var(--text-primary)' }}>{code}</span> tidak ditemukan.
+            Squad dengan kode <span className="font-mono font-bold uppercase" style={{ color: 'var(--text-primary)' }}>{code}</span> tidak ditemukan.
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>
             Pastikan kode sudah benar. Kode bersifat case-insensitive.
